@@ -1,0 +1,524 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>gdb笔记 | NumPy's Blog</title><meta name="keywords" content="gdb"><meta name="author" content="NumPy,xukeawsl@gmail.com"><meta name="copyright" content="NumPy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="gdb常用操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gdb笔记">
+<meta property="og:url" content="https://xukeawsl.gitee.io/2022/09/24/gdb%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="NumPy&#39;s Blog">
+<meta property="og:description" content="gdb常用操作">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s2.loli.net/2022/09/24/AFD3YCpyntiSweE.png">
+<meta property="article:published_time" content="2022-09-24T12:25:37.000Z">
+<meta property="article:modified_time" content="2022-09-24T12:32:47.018Z">
+<meta property="article:author" content="NumPy">
+<meta property="article:tag" content="gdb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/09/24/AFD3YCpyntiSweE.png"><link rel="shortcut icon" href="/img/N.png"><link rel="canonical" href="https://xukeawsl.gitee.io/2022/09/24/gdb%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'gdb笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2022-09-24 20:32:47'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">22</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">7</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">7</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2022/09/24/l59P1byrk4TxmfK.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">NumPy's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">gdb笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2022-09-24T12:25:37.000Z" title="Created 2022-09-24 20:25:37">2022-09-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2022-09-24T12:32:47.018Z" title="Updated 2022-09-24 20:32:47">2022-09-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/gdb/">gdb</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">3.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>13min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="gdb笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="GDB-笔记"><a href="#GDB-笔记" class="headerlink" title="GDB 笔记"></a>GDB 笔记</h1><h2 id="1-启动-GDB"><a href="#1-启动-GDB" class="headerlink" title="1. 启动 GDB"></a>1. 启动 GDB</h2><ul>
+<li><p><code>gdb &lt;program&gt;</code>：programe 即可执行文件，一般在当前目录下</p>
+</li>
+<li><p><code>gdb &lt;program&gt; core</code> ：用 gdb 同时调试一个运行程序和 core 文件，core 是程序非法执行后 core dump 后产生的文件</p>
+</li>
+<li><p><code>gdb &lt;program&gt; &lt;PID&gt;</code> ：让 gdb 调试器附着到一个正在运行的进程上，program 应该在 PATH 环境变量中搜索得到</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"># 例如 a.out 为一个正在运行的程序, 其 PID 为 15344
+# 则可以让 gdb 附着在其上
+(gdb) gdb a.out 15344</code></pre></li>
+</ul>
+<h2 id="2-暂停机制"><a href="#2-暂停机制" class="headerlink" title="2. 暂停机制"></a>2. 暂停机制</h2><ul>
+<li>断点：通知 GDB 在程序中的特定位置暂停执行</li>
+<li>监视点：通知 GDB 当特定内存位置（或者涉及一个或多个位置的表达式）的值发生变化时暂停执行</li>
+<li>捕获点：通知 GDB 当特定事件发生时暂停执行</li>
+</ul>
+<h3 id="2-1-设置断点"><a href="#2-1-设置断点" class="headerlink" title="2.1 设置断点"></a>2.1 设置断点</h3><ul>
+<li><p><code>break function</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> main</code></pre></li>
+<li><p><code>break line_number</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 指定当前活动源文件的行号</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> <span class="token number">20</span></code></pre></li>
+<li><p><code>break filename:line_number</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> src/test.c:30</code></pre></li>
+<li><p><code>break filename:function</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> test.c:hellofunc</code></pre></li>
+</ul>
+<p>当设置一个断点时，该断点的有效性会持续到<strong>删除、禁用或退出</strong> GDB 时，这样可以方便我们更改程序后重新调试时不用再重复打断点，<strong>临时断点</strong>在首次到达后消失，命令为 <code>tbreak</code> ，其使用方式同 <code>break</code> </p>
+<h3 id="2-2-查看断点信息"><a href="#2-2-查看断点信息" class="headerlink" title="2.2 查看断点信息"></a>2.2 查看断点信息</h3><ul>
+<li><p><code>info breakpoints</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info b
+<span class="token punctuation">(</span>output<span class="token punctuation">)</span>
+Num 	Type		Disp	Enb		Address			What
+<span class="token number">1</span>		breakpoint  keep	y		0x25362345		<span class="token keyword">in</span> main at test.c:10
+<span class="token comment"># 1. 标识符（Num）：断点的唯一标识符</span>
+<span class="token comment"># 2. 类型（Type）：指出该断点是断点(breakpoint)、监视点(watchpoint)还是捕获点(catchpoint)</span>
+<span class="token comment"># 3. 部署（Disp）：指示断点下次引起 GDB 暂停程序的执行后该断点上会发生什么事, 有三种可能</span>
+<span class="token comment">#	 保持（keep）：下次到达断点后不改变断点（默认）</span>
+<span class="token comment">#	 删除（del） ：下次到达断点后删除该断点（tbreak）</span>
+<span class="token comment">#	 禁用（dis） ：下次到达断点后禁用该断点（enable once）</span>
+<span class="token comment"># 4. 启用状态（Enb）：说明断点当前是启用还是禁用的</span>
+<span class="token comment"># 5. 地址（Address）：这是内存中设置断点的位置</span>
+<span class="token comment"># 6. 位置（What）：显示了断点所在位置的行号和文件名</span></code></pre></li>
+</ul>
+<p>GDB 会给断点赋予一个唯一的编号来标识断点(Num)</p>
+<h3 id="2-3-删除和禁用断点"><a href="#2-3-删除和禁用断点" class="headerlink" title="2.3 删除和禁用断点"></a>2.3 删除和禁用断点</h3><p>删除断点表示之后都不会用这个断点了，禁用表示暂时另断点不作用，之后可以重新启用</p>
+<p>GDB 删除断点有两个命令，<code>delete</code> 命令用来基于标识符删除断点，<code>clear</code> 命令使用与创建断点相同的语法删除断点</p>
+<ul>
+<li><p><code>delete breakpoint_list</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 使用系统赋予的标识符删除, 可同时删除多个断点</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> delete <span class="token number">2</span> <span class="token number">3</span></code></pre></li>
+<li><p><code>delete</code> </p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 删除所有断点</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> delete</code></pre></li>
+<li><p><code>clear</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 清除 GDB 将执行的下一个指令处的断点</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token function">clear</span></code></pre></li>
+<li><p><code>clear function、clear filename:function、clear line_number、clear filename:line_number</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 根据位置清除断定, 与 break 命令工作方式相似</span></code></pre></li>
+</ul>
+<p>如果要保留断点以便以后使用，同时又不希望 GDB 停止执行，可以禁用它们，在以后需要时再启用</p>
+<ul>
+<li><p><code>disable breakpoint-list</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> disable <span class="token number">3</span></code></pre></li>
+<li><p><code>enable breakpoint-list</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">enable</span> <span class="token number">3</span></code></pre></li>
+<li><p><code>disable</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 禁用所有现有断点</span></code></pre></li>
+<li><p><code>enable</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 启用所有现有断点</span></code></pre></li>
+<li><p><code>enable once breakpoint-list</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 与 tbreak 相似, 不过不是删除断点而是禁用断点</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">enable</span> once <span class="token number">3</span></code></pre></li>
+</ul>
+<h3 id="2-4-条件断点"><a href="#2-4-条件断点" class="headerlink" title="2.4 条件断点"></a>2.4 条件断点</h3><p>有时有必要告诉调试器只有当符合某种条件时才在断点处停止，比如当变量具有我们感兴趣的某个特定的值时</p>
+<ul>
+<li><p>设置条件断点：<code>break break-args if (condition)</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 其中 break-args 是可以传递给 break 以指定断点位置的任何参数</span>
+<span class="token comment"># condition 的圆括号是可选的</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> main <span class="token keyword">if</span> argc <span class="token operator">></span> <span class="token number">1</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">==</span> <span class="token number">100</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 相等、逻辑和不相等运算符（&lt;、&lt;=、==、!=、>、>=、&amp;&amp;、||等)</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> <span class="token number">12</span> <span class="token keyword">if</span> <span class="token assign-left variable">string</span><span class="token operator">==</span>NULL <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> <span class="token number">0</span>
+
+<span class="token comment"># 按位和移位运算符 (&amp;、|、^、>>、&lt;&lt;等)</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> test.c:32 <span class="token keyword">if</span> <span class="token punctuation">(</span>x <span class="token operator">&amp;</span> y<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span>
+
+<span class="token comment"># 算术运算符（+、-、x、/、%）</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> myfunc <span class="token keyword">if</span> i % <span class="token punctuation">(</span>j + <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span>
+
+<span class="token comment"># 你自己的函数, 只要它们被链接到程序中</span>
+<span class="token builtin class-name">break</span> test.c:myfunc <span class="token keyword">if</span> <span class="token operator">!</span>check<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+
+<span class="token comment"># 库函数, 只要其被链接到代码中</span>
+<span class="token builtin class-name">break</span> <span class="token number">44</span> <span class="token keyword">if</span> strlen<span class="token punctuation">(</span>str<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span>
+
+<span class="token comment"># 如果没有调试信息, GDB 会假设函数的返回值是 int</span></code></pre></li>
+<li><p>为正常断点设置条件使其成为条件断点：<code>condition break-list (condition)</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 简写为 cond</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> cond <span class="token number">3</span> i <span class="token operator">==</span> <span class="token number">3</span></code></pre></li>
+<li><p>删除断点的条件，使其成为普通断点：<code>condition break-list</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> cond <span class="token number">3</span></code></pre></li>
+</ul>
+<h3 id="2-5-断点命令列表"><a href="#2-5-断点命令列表" class="headerlink" title="2.5 断点命令列表"></a>2.5 断点命令列表</h3><ul>
+<li><p>到达指定断点后执行一系列命令：</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#(gdb) commands breakpoint-number</span>
+<span class="token comment">#...</span>
+<span class="token comment">#commands</span>
+<span class="token comment">#...</span>
+<span class="token comment">#end</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> commands <span class="token number">1</span>
+<span class="token operator">></span>silent <span class="token comment"># 可以使 GDB 更安静地触发断点</span>
+<span class="token operator">></span>printf <span class="token string">"test %d.<span class="token entity" title="\n">\n</span>"</span>, <span class="token function">v</span>
+<span class="token operator">></span>end
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span>
+<span class="token comment"># 如果命令列表中的最后一个命令是 continue, GDB 将在完成命令列表</span>
+<span class="token comment"># 中的命令后自动执行程序</span></code></pre></li>
+<li><p>定义宏</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> define print_and_go
+<span class="token operator">></span>printf <span class="token variable">$arg0</span>, <span class="token variable">$arg1</span>
+<span class="token operator">></span>continue
+<span class="token operator">></span>end
+
+
+<span class="token comment"># 使用宏</span>
+commands <span class="token number">1</span>
+<span class="token operator">></span>silent
+<span class="token operator">></span>print_and_go <span class="token string">"test %d.<span class="token entity" title="\n">\n</span>"</span>, <span class="token function">v</span>
+<span class="token operator">></span>end</code></pre></li>
+<li><p>列出所有宏：<code>show user</code></p>
+</li>
+</ul>
+<h3 id="2-6-监视点"><a href="#2-6-监视点" class="headerlink" title="2.6 监视点"></a>2.6 监视点</h3><p>监视点是一种特殊类型的断点，它类似于正常断点，是要求 GDB 暂停程序执行的指令，区别在于监视点没有“住在”某一行源代码中，而是指示 GDB 每当某个表达式改变了值就暂停执行，可以将监视点看做被“附加”在表达式上，当表达式的值改变时 ，GDB 会暂停程序的执行</p>
+<ul>
+<li><p>监视点变量：<code>watch var</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># GDB 实际上是在 var 的内存位置改变值时终端</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token function">watch</span> val</code></pre></li>
+<li><p>监视表达式：<code>watch expr</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 当表达式的值变化时会暂停程序执行</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token function">watch</span> val <span class="token operator">></span> <span class="token number">10</span></code></pre></li>
+</ul>
+<h2 id="3-恢复执行"><a href="#3-恢复执行" class="headerlink" title="3. 恢复执行"></a>3. 恢复执行</h2><ul>
+<li><p>单步进入（step into）：<code>step</code> </p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 简写为 s, step 会进入函数内部, 如果没有函数的调试信息则不会进入</span>
+<span class="token comment"># 可以在 step 后面加上行数, 相当于多次执行 step 命令</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> s <span class="token number">10</span></code></pre></li>
+<li><p>单步越过（step out）：<code>next</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 简写为 n, next 不会进入函数内部, 而是直接跳过并得到返回结果</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> n <span class="token number">10</span></code></pre></li>
+<li><p>恢复程序执行：<code>continue</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># continue 会使程序继续运行直到遇到下一个断点后停止</span>
+<span class="token comment"># 简写为 c, 接受一个可选的整数参数 n, 要求 GDB 忽略下面 n 个断点</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> c
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> c <span class="token number">10</span></code></pre></li>
+<li><p>恢复程序执行：<code>finish</code> </p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># finish(简写为 fin)指示 GDB 恢复执行，直到恰好在当前栈帧完成之后位置</span>
+<span class="token comment"># finish 的一个常见用途是当不小心单步进入原本希望单步越过的函数时，使用 finish 可以将你</span>
+<span class="token comment"># 正好放回到使用 next 会到的位置（不能直接退出 main 函数）, 如果在一个递归函数中</span>
+<span class="token comment"># finish 只会将你带到递归的上一层, 如果要在递归层次较高时完全退出递归函数，可以通过</span>
+<span class="token comment"># 临时断点及continue，或者用 until 命令</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> fin</code></pre></li>
+<li><p>恢复程序执行：<code>until</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># until(简写为u)通常用来在不进一步在循环中暂停的情况下完成正在执行的循环</span>
+<span class="token comment"># until 命令也可以接受源代码中的位置作为参数, 可以使程序运行到指定位置</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> u
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> u <span class="token number">17</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> u swap
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> u test.c:18
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> u test.c:swap</code></pre></li>
+</ul>
+<h2 id="4-检查和设置变量"><a href="#4-检查和设置变量" class="headerlink" title="4. 检查和设置变量"></a>4. 检查和设置变量</h2><ul>
+<li><p>打印变量的值：<code>print var</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 打印普通变量</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print <span class="token function">v</span>
+
+<span class="token comment"># 打印字符串指针地址及内容</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print str
+
+<span class="token comment"># 打印字符串的第一个字符</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print *str
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print str<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+<span class="token comment"># 打印带命名空间的变量</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print dev::val</code></pre></li>
+<li><p>打印表达式的值：<code>print expr</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 注意变量需要在可以访问到的作用域</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print val <span class="token operator">&lt;</span> <span class="token number">2</span></code></pre></li>
+<li><p>按不同进制输出：<code>print /f var</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell">- x 按十六进制格式显示变量
+- d 按十进制格式显示变量
+- u 按十六进制格式显示无符号整型
+- o 按八进制格式显示变量
+- t 按二进制格式显示变量
+- a 按十六进制格式显示变量
+- c 按字符格式显示变量
+- 按浮点数格式显示变量
+
+<span class="token comment"># 按十六进制显示</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print /x digit
+
+<span class="token comment"># 按二进制打印变量地址</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print /t <span class="token operator">&amp;</span>val </code></pre></li>
+<li><p>打印动态数组：<code>print *array@len</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># print 简写为 p</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> p *arr@10
+
+<span class="token comment"># 打印动态数组中的某个元素</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> p arr<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span>
+
+<span class="token comment"># 打印静态数组</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> p arr</code></pre></li>
+<li><p>浏览类或结构体的结构：<code>ptype var</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> ptype node</code></pre></li>
+<li><p>监视局部变量：<code>info locals</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 列出当前栈帧中所有局部变量的值</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info locals</code></pre></li>
+<li><p>检查当前函数参数的值：<code>info args</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info args</code></pre></li>
+<li><p>每次暂停都打印变量：<code>display var</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># display(简写disp)会在每次暂停时打印变量, 前提是在作用域内</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> disp x
+
+<span class="token comment"># 查看所有显示项</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info disp
+
+<span class="token comment"># 禁用某个显示项</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> dis disp <span class="token number">1</span>
+
+<span class="token comment"># 启用某个显示项</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">enable</span> disp <span class="token number">1</span>
+
+<span class="token comment"># 完全删除某个显示项</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> undisp <span class="token number">1</span></code></pre></li>
+<li><p>查看内存：<code>examine addr</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># examine(简写为x)来查看内存地址中的值</span>
+<span class="token comment"># x /n、f、u 是可选的参数</span>
+<span class="token comment"># n 是一个正整数，表示显示内存的长度，也就说从当前地址向后显示几个地址的内容</span>
+<span class="token comment"># f 表示显示的格式， 跟 print 的格式参数相同</span>
+<span class="token comment"># u 表示从当前地址往后请求的字节数，如果不指定的话，GDB 默认是 4 bytes, u参数可以用</span>
+<span class="token comment"># 下面的字符来代替, b 表示单字节, h 表示双字节, w 表示四字节, g 表示八字节</span>
+
+
+<span class="token comment"># 表示从内存地址 0x54320 读取内容，h表示以双字节为一个单位，3表示三个单位，u表示按十六进制显示</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> x /3uh 0x54320
+
+<span class="token comment"># 根据字符串首地址打印其所有字符</span>
+const char* str <span class="token operator">=</span> <span class="token string">"hello world"</span><span class="token punctuation">;</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> call strlen<span class="token punctuation">(</span>str<span class="token punctuation">)</span> <span class="token comment"># 调用函数取得字符串长度</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> x /11cb str
+0x555555556005: <span class="token number">104</span> <span class="token string">'h'</span> <span class="token number">101</span> <span class="token string">'e'</span> <span class="token number">108</span> <span class="token string">'l'</span> <span class="token number">108</span> <span class="token string">'l'</span> <span class="token number">111</span> <span class="token string">'o'</span> <span class="token number">32</span> <span class="token string">' '</span>  <span class="token number">119</span> <span class="token string">'w'</span> <span class="token number">111</span> <span class="token string">'o'</span>
+0x55555555600d: <span class="token number">114</span> <span class="token string">'r'</span> <span class="token number">108</span> <span class="token string">'l'</span> <span class="token number">100</span> <span class="token string">'d'</span>
+
+<span class="token comment"># 按二进制格式打印6个单元, 每个单元占2个字节, 注意里考虑的字节序</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> x /6th str
+0x555555556005: 0110010101101000        0110110001101100        0010000001101111        0110111101110111        0110110001110010    0000000001100100</code></pre></li>
+<li><p>设置变量：<code>set var = val</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 可以改变正在运行的程序中变量的值</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">set</span> x <span class="token operator">=</span> <span class="token number">10</span></code></pre></li>
+<li><p>设置命令行参数：<code>set args v1 v2 v3 v4</code></p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 在 run 之前设置</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">set</span> args <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+
+<span class="token comment"># 在 run 的同时设置</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> run <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span></code></pre></li>
+</ul>
+<h2 id="5-处理程序崩溃"><a href="#5-处理程序崩溃" class="headerlink" title="5. 处理程序崩溃"></a>5. 处理程序崩溃</h2><p>当程序因段错误崩溃时，系统会编写一个名为核心文件（core file）的文件，俗称转储核心。核心文件包含程序崩溃时对程序状态的详细描述：栈的内容（或者，如果程序是多线程的，则是各个线程的栈），CPU 寄存器的内存（同样，如果程序是多线程的，则是每个线程上的一组寄存器值），程序的静态分配变量的值（全局与 static 变量）等等。</p>
+<p>很多情况下，调试过程都不涉及核心文件，如果程序发生了段错误，程序员只要打开调试器并在此运行程序就可以重建该错误，因此又由于核心文件比较大，所以大多数现代 shell 都会在一开始防止编写核心文件，故需要使用 <code>ulimit</code> 命令来控制核心文件的创建</p>
+<ul>
+<li><p><code>ulimit -c n</code> ：其中 n 是核心文件的最大大小，以千字节为单位，超过 nKB 的核心文件都不会被编写</p>
+</li>
+<li><p><code>ulimit -c unlimited</code> ：允许任意大小的核心文件</p>
+</li>
+</ul>
+<h3 id="5-3-查看栈信息"><a href="#5-3-查看栈信息" class="headerlink" title="5.3 查看栈信息"></a>5.3 查看栈信息</h3><p>当程序被停住了，你需要做的第一件事就是查看程序是在哪里停住的，每当调用了一个函数，函数的地址，函数参数，函数内的局部变量都会被压入栈中，可以用 <code>backtrack</code> 命令来查看当前的栈中的信息</p>
+<ul>
+<li><code>backtrace</code> ：简写 bt ，打印完整的调用堆栈</li>
+<li><code>backtrace &lt;n&gt;</code> ：n是一个正整数，表示只打印栈顶上 n 层的栈信息</li>
+<li><code>backtrace &lt;-n&gt;</code> ：-n 表示一个负整数，表示只打印栈底下 n 层的栈信息</li>
+</ul>
+<p>如果要查看某一层的信息，需要切换当前的栈，调用 <code>bt</code> 命令查看调用栈时，最上层的栈就是当前栈，编号为0，往下依次递增，可以通过 <code>frame</code> 命令切换到其它栈</p>
+<ul>
+<li><p><code>frame &lt;n&gt;</code> ：简写为 f, n 表示栈帧编号</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> f <span class="token number">3</span> <span class="token comment"># 切换到编号为 3 的栈帧</span></code></pre></li>
+<li><p><code>up &lt;n&gt;</code> ：表示向栈的上面移动 n 层, 并打印栈详细信息, n 默认为1</p>
+</li>
+<li><p><code>down &lt;n&gt;</code> ：表示向栈的下面移动 n 层，并打印栈详细信息，n 默认为1</p>
+</li>
+</ul>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 如果不想打印栈信息, 可以通过如下命令</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> select-frame <span class="token operator">&lt;</span>n<span class="token operator">></span> <span class="token comment"># 对应 frame</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> up-silently <span class="token operator">&lt;</span>n<span class="token operator">></span> <span class="token comment"># 对应 up</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> down-silently <span class="token operator">&lt;</span>n<span class="token operator">></span> <span class="token comment"># 对应 down</span></code></pre>
+
+<h3 id="5-2-使用-core-文件调试程序"><a href="#5-2-使用-core-文件调试程序" class="headerlink" title="5.2 使用 core 文件调试程序"></a>5.2 使用 core 文件调试程序</h3><p>通过 core 文件可以复现可能需要很长一段时间才会发生的程序错误，有些程序的行为取决于随机的环境事件，比如客户现场出现了崩溃问题，但是难以复现，因此只能通过核心文件来找到当时出现问题的地方</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment"># 通过 core 启动 gdb</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> gdb a.out core
+
+<span class="token comment"># 如果启动后出现??，说明没有动态库调试信息, 可以在 run 之前设置动态库搜索路径</span>
+<span class="token comment"># 多个路径之间用 ':' 分隔</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">set</span> solib-absolute-prefix /lib:/usr/lib <span class="token comment"># 库的绝对路径前缀</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">set</span> solib-search-path <span class="token punctuation">..</span>/lib:/usr/lib <span class="token comment"># 设置库的搜索路径, 可以是相对路径</span>
+
+<span class="token comment"># 例子</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> gdb a.out core
+<span class="token comment"># 如果发现出现问题地方的函数名为 ??, 用 info sharedlibrary 命令查看缺少的动态库</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info sharedlibrary
+From                To                  Syms Read   Shared Object Library
+                                        No          /root/gdb_learn/build/libsvc_add.so
+0x00007f60ed5fe160  0x00007f60ed6e6452  Yes <span class="token punctuation">(</span>*<span class="token punctuation">)</span>     /lib/x86_64-linux-gnu/libstdc++.so.6
+0x00007f60ed390630  0x00007f60ed50527d  Yes         /lib/x86_64-linux-gnu/libc.so.6
+0x00007f60ed22c3c0  0x00007f60ed2d2fa8  Yes         /lib/x86_64-linux-gnu/libm.so.6
+0x00007f60ed756100  0x00007f60ed778684  Yes         /lib64/ld-linux-x86-64.so.2
+0x00007f60ed2075e0  0x00007f60ed218045  Yes <span class="token punctuation">(</span>*<span class="token punctuation">)</span>     /lib/x86_64-linux-gnu/libgcc_s.so.1
+<span class="token punctuation">(</span>*<span class="token punctuation">)</span>: Shared library is missing debugging information.
+<span class="token comment"># 这里在 a.out 运行的目录下缺少 libsvc_add.so 库</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">set</span> solib-search-path <span class="token punctuation">..</span>/lib <span class="token comment"># 这里设置动态库的路径</span>
+
+<span class="token comment"># 重新加载 core 文件</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> core-file core
+
+<span class="token comment"># 查看调用堆栈 backtrace</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> bt
+
+<span class="token comment"># 在栈帧间切换并打印栈中的变量值进行分析</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> f <span class="token number">3</span>
+<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> print x</code></pre>
+
+
+
+<h2 id="6-线程相关命令"><a href="#6-线程相关命令" class="headerlink" title="6. 线程相关命令"></a>6. 线程相关命令</h2><ul>
+<li><p><code>info threads</code> ：给出关于当前所有线程的信息</p>
+</li>
+<li><p><code>thread id</code> ：切换当前调试所在线程, id 可以通过 <code>info threads</code> 看到</p>
+</li>
+<li><p><code>break line-num thread id</code> ：当指定 id 的线程到达源代码 line-num 行时停止执行</p>
+</li>
+<li><p><code>break line-num thread id if condition</code> ：当到达指定位置并满足条件时停止</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> <span class="token builtin class-name">break</span> <span class="token number">32</span> thread <span class="token number">2</span> <span class="token keyword">if</span> x <span class="token operator">==</span> y</code></pre></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:xukeawsl@gmail.com">NumPy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://xukeawsl.gitee.io/2022/09/24/gdb%E7%AC%94%E8%AE%B0/">https://xukeawsl.gitee.io/2022/09/24/gdb%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/gdb/">gdb</a></div><div class="post_share"><div class="social-share" data-image="https://s2.loli.net/2022/09/24/AFD3YCpyntiSweE.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src="https://s2.loli.net/2022/10/07/5AI9NBFSxYibThe.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">Oracle笔记</div></div></a></div><div class="next-post pull-right"><a href="/2022/05/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/"><img class="next-cover" src="https://s2.loli.net/2022/05/16/frVxQGFPMW6UtpI.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">网络编程笔记</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81NDc3My8zMTI0Mw=="></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">NumPy</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">22</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">7</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">7</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xukeawsl/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xukeawsl" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xukeawsl@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#GDB-%E7%AC%94%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">GDB 笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%90%AF%E5%8A%A8-GDB"><span class="toc-number">1.1.</span> <span class="toc-text">1. 启动 GDB</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%9A%82%E5%81%9C%E6%9C%BA%E5%88%B6"><span class="toc-number">1.2.</span> <span class="toc-text">2. 暂停机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E8%AE%BE%E7%BD%AE%E6%96%AD%E7%82%B9"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 设置断点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%9F%A5%E7%9C%8B%E6%96%AD%E7%82%B9%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 查看断点信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%88%A0%E9%99%A4%E5%92%8C%E7%A6%81%E7%94%A8%E6%96%AD%E7%82%B9"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 删除和禁用断点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%9D%A1%E4%BB%B6%E6%96%AD%E7%82%B9"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 条件断点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E6%96%AD%E7%82%B9%E5%91%BD%E4%BB%A4%E5%88%97%E8%A1%A8"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 断点命令列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E7%9B%91%E8%A7%86%E7%82%B9"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 监视点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%81%A2%E5%A4%8D%E6%89%A7%E8%A1%8C"><span class="toc-number">1.3.</span> <span class="toc-text">3. 恢复执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%A3%80%E6%9F%A5%E5%92%8C%E8%AE%BE%E7%BD%AE%E5%8F%98%E9%87%8F"><span class="toc-number">1.4.</span> <span class="toc-text">4. 检查和设置变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F%E5%B4%A9%E6%BA%83"><span class="toc-number">1.5.</span> <span class="toc-text">5. 处理程序崩溃</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%9F%A5%E7%9C%8B%E6%A0%88%E4%BF%A1%E6%81%AF"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.3 查看栈信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E4%BD%BF%E7%94%A8-core-%E6%96%87%E4%BB%B6%E8%B0%83%E8%AF%95%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 使用 core 文件调试程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="toc-number">1.6.</span> <span class="toc-text">6. 线程相关命令</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/" title="Oracle笔记"><img src="https://s2.loli.net/2022/10/07/5AI9NBFSxYibThe.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Oracle笔记"/></a><div class="content"><a class="title" href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/" title="Oracle笔记">Oracle笔记</a><time datetime="2022-09-30T02:03:10.000Z" title="Created 2022-09-30 10:03:10">2022-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/24/gdb%E7%AC%94%E8%AE%B0/" title="gdb笔记"><img src="https://s2.loli.net/2022/09/24/AFD3YCpyntiSweE.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="gdb笔记"/></a><div class="content"><a class="title" href="/2022/09/24/gdb%E7%AC%94%E8%AE%B0/" title="gdb笔记">gdb笔记</a><time datetime="2022-09-24T12:25:37.000Z" title="Created 2022-09-24 20:25:37">2022-09-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/" title="网络编程笔记"><img src="https://s2.loli.net/2022/05/16/frVxQGFPMW6UtpI.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="网络编程笔记"/></a><div class="content"><a class="title" href="/2022/05/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/" title="网络编程笔记">网络编程笔记</a><time datetime="2022-05-16T09:31:55.000Z" title="Created 2022-05-16 17:31:55">2022-05-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/28/MySQL%E7%AC%94%E8%AE%B0/" title="MySQL笔记"><img src="https://s2.loli.net/2022/02/28/a2HsQGWDpOkJvUg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL笔记"/></a><div class="content"><a class="title" href="/2022/02/28/MySQL%E7%AC%94%E8%AE%B0/" title="MySQL笔记">MySQL笔记</a><time datetime="2022-02-28T13:00:47.000Z" title="Created 2022-02-28 21:00:47">2022-02-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/12/17/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%94%E8%AE%B0-14-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/" title="操作系统笔记(14)-常见并发问题"><img src="https://s2.loli.net/2021/12/17/dkYCtz4wel2sWcV.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="操作系统笔记(14)-常见并发问题"/></a><div class="content"><a class="title" href="/2021/12/17/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%94%E8%AE%B0-14-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/" title="操作系统笔记(14)-常见并发问题">操作系统笔记(14)-常见并发问题</a><time datetime="2021-12-17T06:01:36.000Z" title="Created 2021-12-17 14:01:36">2021-12-17</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2022/09/24/l59P1byrk4TxmfK.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By NumPy</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
