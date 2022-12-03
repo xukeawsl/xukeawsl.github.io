@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Using Asio with C++11 | NumPy's Blog</title><meta name="keywords" content="C++"><meta name="author" content="NumPy,xukeawsl@gmail.com"><meta name="copyright" content="NumPy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="C++ Asio 网络库">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Using Asio with C++11">
+<meta property="og:url" content="https://xukeawsl.gitee.io/2022/12/03/Using-Asio-with-C-11/index.html">
+<meta property="og:site_name" content="NumPy&#39;s Blog">
+<meta property="og:description" content="C++ Asio 网络库">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s2.loli.net/2022/12/03/fyvspDjRAi2zxTk.png">
+<meta property="article:published_time" content="2022-12-03T07:13:43.000Z">
+<meta property="article:modified_time" content="2022-12-03T07:15:37.920Z">
+<meta property="article:author" content="NumPy">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/12/03/fyvspDjRAi2zxTk.png"><link rel="shortcut icon" href="/img/N.png"><link rel="canonical" href="https://xukeawsl.gitee.io/2022/12/03/Using-Asio-with-C-11/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Using Asio with C++11',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2022-12-03 15:15:37'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">23</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2022/12/03/GU34nMwD2XvrsC7.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">NumPy's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Using Asio with C++11</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2022-12-03T07:13:43.000Z" title="Created 2022-12-03 15:13:43">2022-12-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2022-12-03T07:15:37.920Z" title="Updated 2022-12-03 15:15:37">2022-12-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">4.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>15min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Using Asio with C++11"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>原文链接：<a target="_blank" rel="noopener" href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3388.pdf">《Using Asio with C++11》</a></p>
+<p>本文既是对Asio库的介绍，也是对其实现和与C++11结合使用的简要概述。</p>
+<h2 id="1-Asio-库的-C-11-变体"><a href="#1-Asio-库的-C-11-变体" class="headerlink" title="1. Asio 库的 C++11 变体"></a>1. Asio 库的 C++11 变体</h2><p>本文不是使用 Asio 库的 Boost 发行版，而是一个独立于 Boost 的 Asio 变体。此变体的目标包括：</p>
+<ul>
+<li>在接口中只使用 C++11 语言特性；</li>
+<li>证明该库可以仅使用C++11标准库和操作系统提供的设施来实现。</li>
+</ul>
+<p>这个变体的仓库地址在 <a target="_blank" rel="noopener" href="https://github.com/chriskohlhoff/asio/tree/cpp11-only">https://github.com/chriskohlhoff/asio/tree/cpp11-only</a></p>
+<h2 id="2-使用-I-O-流解决一些简单问题的用例"><a href="#2-使用-I-O-流解决一些简单问题的用例" class="headerlink" title="2. 使用 I/O 流解决一些简单问题的用例"></a>2. 使用 I/O 流解决一些简单问题的用例</h2><p>在许多应用程序中，网络不是一个核心功能，也不被视为应用程序开发者的核心能力。为了迎合这些用例，Asio 提供了一个高级的 TCP 套接字接口，它是围绕我们熟悉的 C++ I/O 流框架设计的。</p>
+<p>使用这个库可以通过下面这种方式用远程主机的详细信息轻易地构造一个流对象：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">asio::ip::tcp::iostream s(&quot;www.boost.org&quot;, &quot;http&quot;);</code></pre>
+
+<p>接下来，决定是否要在主机无响应一段时间后放弃套接字：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">s.expires_from_now(std::chrono::seconds(60));</code></pre>
+
+<p>然后，根据需要发送和接收任何数据。在这个例子里你可以发送如下请求：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">s &lt;&lt; &quot;GET &#x2F; HTTP&#x2F;1.0\r0.2cm\n&quot;;
+s &lt;&lt; &quot;Host: www.boost.org\r\n&quot;;
+s &lt;&lt; &quot;Accept: *&#x2F;*\r\n&quot;;
+s &lt;&lt; &quot;Connection: close\r\n\r\n&quot;;</code></pre>
+
+<p>最后接收并处理响应：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">std::string header;
+while (std::getline(s, header) &amp;&amp; header !&#x3D; &quot;\r&quot;)
+    std::cout &lt;&lt; header &lt;&lt; &quot;\n&quot;;
+std::cout &lt;&lt; s.rdbuf();</code></pre>
+
+<p>如果任何时候出现错误，<code>tcp::iostream</code> 类的 <code>error()</code> 成员函数可以用来确认错误的原因：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">if (!s)
+&#123;
+    std::cout &lt;&lt; &quot;Socket error: &quot; &lt;&lt; s.error().message() &lt;&lt; &quot;\n&quot;;
+    return 1;
+&#125;</code></pre>
+
+<h2 id="3-了解同步操作"><a href="#3-了解同步操作" class="headerlink" title="3. 了解同步操作"></a>3. 了解同步操作</h2><p>同步操作是在相应的操作系统操作完成之前不会将控制权返回给调用者的函数。在基于 Asio 的程序中它们的使用通常可以分为两类：</p>
+<ul>
+<li>不关心超时或依赖于底层操作系统提供的超时行为的简单程序。</li>
+<li>需要对系统调用进行细粒度控制的程序，并且知道同步操作会或不会阻塞的条件。</li>
+</ul>
+<p>Asio 可用于对 I/O 对象（如套接字）执行同步和异步操作。然而，同步操作提供了一个机会，可以从概念上简单概述Asio的各个部分，你的程序以及它们如何协同工作。作为一个介绍性的示例，让我们考虑一下当您在套接字上执行同步连接操作时会发生什么。</p>
+<p>你的程序将至少有一个 <code>io_service</code> 对象。这个 <code>io_service</code> 表示你的程序到操作系统 I/O 服务的链接。（补充：现在一般不用 <code>io_service</code> 而是 <code>io_context</code> ，但是实质上还是一样的）</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">asio::io_service io_service;</code></pre>
+
+<p>要执行 I/O 操作，你的程序将需要一个 I/O 对象，如一个 TCP 套接字：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">asio::ip::tcp::socket socket(io_service);</code></pre>
+
+<p>当执行同步连接操作时，会发生以下事件序列：</p>
+<p><img src="https://s2.loli.net/2022/12/03/GU34nMwD2XvrsC7.png"></p>
+<ol>
+<li><p>你的程序通过调用 I/O 对象来启动连接操作：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">socket.connect(server_endpoint);</code></pre></li>
+<li><p>I/O 对象会将请求转发到 <code>io_service</code> 。</p>
+</li>
+<li><p><code>io_service</code> 调用操作系统以执行连接操作。</p>
+</li>
+<li><p>操作系统会将操作的结果返回给 <code>io_service</code> 。</p>
+</li>
+<li><p><code>io_service</code> 将该操作导致的任何错误转换为 <code>std::error_code</code> 类型的对象。然后将结果转发回 I/O 对象。</p>
+</li>
+<li><p>如果操作失败，I/O 对象将抛出 <code>std::system_error</code> 类型的异常。如果启动操作的代码已经被写为：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">std::error_code ec;
+socket.connnect(server_endpoint, ec);</code></pre>
+
+<p>就会将 <code>error_code</code> 变量 <code>ec</code> 设置为操作的结果，并且不会抛出任何异常。</p>
+</li>
+</ol>
+<h2 id="4-了解异步操作"><a href="#4-了解异步操作" class="headerlink" title="4. 了解异步操作"></a>4. 了解异步操作</h2><p>异步操作不会阻塞调用者，而是在相应的操作系统操作完成时向程序发送通知。大多数基于 Asio 的非平凡程序将使用异步操作。</p>
+<p>当使用异步操作时，会发生以下事件序列：</p>
+<p><img src="https://s2.loli.net/2022/12/03/fyvspDjRAi2zxTk.png"></p>
+<ol>
+<li><p>你的程序通过调用 I/O 对象来启动异步连接操作：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">socket.async_connect(server_endpoint, your_completion_handler)</code></pre>
+
+<p>这个 <code>async_connect()</code> 函数是一个异步函数。异步函数在 Asio 中以前缀 <code>async_</code> 命名。异步函数将函数对象（称为 completion handler）作为最后的参数。在这种特殊情况下，你的 <code>your_completion_handler</code> 是一个具有指定函数签名的函数或函数对象：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">void your_completion_handler(const std::error_code&amp; ec);</code></pre>
+
+<p>完成处理程序所需的确切签名取决于正在执行的异步操作。Asio 参考文档指出了每项操作的适当形式。</p>
+</li>
+<li><p>I/O 对象会将请求转发到 <code>io_service</code> 。</p>
+</li>
+<li><p><code>io_service</code> 向操作系统发出信号，表明它应该启动一个异步连接操作。</p>
+</li>
+</ol>
+<p>时间过去了。（在同步的情况下，这种等待将完全包含在连接操作的持续时间内。）在此期间，操作系统在理论上负责异步操作，这被称为未完成的工作。</p>
+<p><img src="https://s2.loli.net/2022/12/03/aREvBtgjD5XfwAS.png"></p>
+<ol start="4">
+<li>操作系统通过将结果放在一个队列中，准备好由 <code>io_service</code> 接受，来表示连接操作已经完成。</li>
+<li>你的程序必须调用 <code>io_service::run()</code> （或一个类似的 <code>io_service</code> 成员函数）以便检索结果。当有未完成的工作时，对 <code>io_service::run()</code> 的调用将会阻塞。你通常会在开始第一个异步操作后立即调用它。</li>
+<li>在对 <code>io_service::run()</code> 的调用中，<code>io_service</code> 出队操作的结果，将其转换为 <code>error_code</code> 然后将其传递给你的完成处理函数。</li>
+</ol>
+<h2 id="5-连锁异步操作"><a href="#5-连锁异步操作" class="headerlink" title="5. 连锁异步操作"></a>5. 连锁异步操作</h2><p>一个异步操作被认为是未完成的工作，直到其关联的完成处理函数被调用并返回为止。完成处理函数可以反过来调用其它异步函数，从而创建更多未完成的工作。</p>
+<p>考虑在连接之后，在套接字上执行其它 I/O 操作的情况：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">socket.async_connect(server_endpoint, [&amp;](std::error_code ec)&#123;
+   if (!ec) &#123;
+       socket.async_read_some(
+           asio::buffer(data),
+           [&amp;](std::error_code ec, std::size_t length)&#123;
+               if (!ec) &#123;
+                   async_write(socket, asio::buffer(data, length),
+                              [&amp;](std::error_code ec, std::size_t length)&#123;
+                                  &#x2F;&#x2F;...
+                              &#125;);
+               &#125;
+           &#125;);
+   &#125;
+&#125;);</code></pre>
+
+<p>异步连接操作的完成处理程序在这里表示为 C++11 的 lambda 函数，用于启动一个异步读取操作。它有自己相关的未完成工作，并且它的完成处理程序以异步写入的形式创建了更多的工作。因此，直到链中的所有操作都完成之前，<code>io_service::run()</code> 都不会返回。</p>
+<p>当然，在实际的程序中，这些链通常更长，并且可能包含循环或分叉。在这些程序中，<code>io_service::run()</code> 可能无限执行下去。</p>
+<h2 id="6-处理错误"><a href="#6-处理错误" class="headerlink" title="6. 处理错误"></a>6. 处理错误</h2><p>Asio 的错误处理方法是基于这样一种观点：异常并不总是处理错误的正确办法。例如，在网络编程中，经常会遇到一些错误如：</p>
+<ul>
+<li>你无法连接到远程 IP 地址。</li>
+<li>你的链接已退出。</li>
+<li>你尝试打开一个 IPv6 套接字，但没有可用的 IPv6 网络接口。</li>
+</ul>
+<p>这些可能是例外情况，但同样可以作为正常控制流程的一部分进行处理。如果你有理由认为它会发生，这并不例外。分别为：</p>
+<ul>
+<li>IP 地址是与主机名对应的地址列表之一。你可能想尝试连接列表中的下一个地址。</li>
+<li>网络不可靠。你想尝试重新建立连接并只在失败 n 次后才放弃。</li>
+<li>你的程序可以返回到使用 IPv4 套接字。</li>
+</ul>
+<p>错误是否异常取决于程序的上下文。此外，由于代码大小或性能限制，一些领域可能不愿意或无法使用异常。因此，所有同步操作都提供了抛出异常：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">socket.connect(server_endpoint);	&#x2F;&#x2F; 出错抛出 std::system_error 异常</code></pre>
+
+<p>和不抛异常的重载版本：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">std::error_code ec;
+socket.connect(server_endpoint, ec);	&#x2F;&#x2F; 设置 ec 来表明错误</code></pre>
+
+<p>处于类似的原因，Asio 不会根据操作是否完成并出现错误而使用单独的完成处理程序。这样做将在异步操作链中创建一个分叉，该分叉可能与程序对什么构成错误条件的概念不匹配。</p>
+<h2 id="7-管理对象生命周期"><a href="#7-管理对象生命周期" class="headerlink" title="7. 管理对象生命周期"></a>7. 管理对象生命周期</h2><p>当使用异步操作时，一个特殊的挑战是对象生命周期管理。Asio 采用了一种没有明确支持管理对象生存期的方法。相反，根据基于如何声明启动函数的规则，将生命周期需求置于程序控制之下：</p>
+<ul>
+<li><p><strong>按值，常量引用和右值引用参数。</strong></p>
+<p>根据库实现的需要复制或移动这些参数，直到不再需要为止。例如，库实现维护完成处理程序对象的副本，直到调用处理程序之后。</p>
+</li>
+<li><p><strong>非常量引用参数，this 指针。</strong></p>
+<p>程序负责确保该对象在异步操作之前一直保持有效。</p>
+</li>
+</ul>
+<p>许多基于 Asio 的程序采用的一种方法是将对象生存期与完成处理程序联系起来。这可以通过使用 <code>std::shared_ptr&lt;&gt;</code> 和 <code>std::enable_shared_from_this&lt;&gt;</code> ：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">class connection : 
+    std::enable_shared_from_this&lt;connection&gt;
+&#123;
+    asio::ip::tcp::socket socket_;
+    std::vector&lt;unsigned char&gt; data_;
+    &#x2F;&#x2F; ...
+    void start_read()
+    &#123;
+        socket_.async_read_some(
+                    asio::buffer(data_),
+                    std::bind(&amp;connection::handle_read, shared_from_this(),
+                              std::placeholders::_1, std::placeholders::_2));
+    &#125;
+    &#x2F;&#x2F; ...
+    void handle_read(std::error_code ec, std::size_t length) &#123;
+
+    &#125;
+&#125;;</code></pre>
+
+<p>使用 C++11，这种方法可以在可用性和性能之间给出很好的权衡。Asio 能够利用可移动的完成处理程序来减少引用计数相关的开销。由于程序通常由异步操作链组成，指针的所有权可以沿着链转移；引用计数只在链的开始和结尾更新。</p>
+<p>然而，有些程序需要对对象生命期，内存使用量和执行效率进行细粒度的控制。通过将对象生命周期置于程序控制之下，这些需求也被支持。例如，另一种方法是在程序启动时创建所有对象。完成处理程序不需要在对象生命周期中扮演角色，而且复制起来可能非常便宜。</p>
+<h2 id="8-优化内存分配"><a href="#8-优化内存分配" class="headerlink" title="8. 优化内存分配"></a>8. 优化内存分配</h2><p>许多异步操作需要分配一个对象类存储与该操作关联的状态。例如，Windows 实现需要 OVERLAPPED 派生对象类传递给 Win32 API 函数。</p>
+<p>默认情况下，Asio 将使用 <code>::operator new()</code> 为该记账信息分配空间。然而，异步操作链为这里提供了一个优化的机会。每个链可以有一个与之相关联的内存块，同一块可以重复用于链中的每个顺序操作。这意味着可以编写不执行持续内存分配的异步协议实现。</p>
+<p>此自定义内存分配的钩子是异步操作的完成处理程序。处理程序标识正在执行操作的较大上下文。通过将这个完成处理程序传递给启动函数，Asio 能够在向操作系统发出启动异步操作的信号之前分配必要的内存。</p>
+<h2 id="9-处理并发"><a href="#9-处理并发" class="headerlink" title="9. 处理并发"></a>9. 处理并发</h2><p>协议实现通常涉及到多个异步操作链的协调。例如，一个操作链可以处理消息发送、另一个接收，而第三个操作链可以实现应用层超时。所有这些链都需要访问公共变量，如套接字、计时器和缓冲区。此外，这些异步操作可以无限期地继续进行。</p>
+<p>异步操作提供了一种实现并发性的方法，而无需增加线程的开销和复杂性。然而，Asio 的接口被设计为支持一系列的线程方法，其中一些方法概述如下。</p>
+<h3 id="单线程设计"><a href="#单线程设计" class="headerlink" title="单线程设计"></a>单线程设计</h3><p>Asio 保证完成处理函数只能从 <code>io_service::run()</code> 内部调用。因此，通过仅从一个线程调用 <code>io_service::run()</code> ，可以防止处理程序的并行执行。这种设计是大多数程序的推荐起点，因为不需要显式的同步机制。但是，必须注意保持处理程序的简短和非阻塞性。</p>
+<h3 id="使用线程来执行长时间运行的任务"><a href="#使用线程来执行长时间运行的任务" class="headerlink" title="使用线程来执行长时间运行的任务"></a>使用线程来执行长时间运行的任务</h3><p>作为单线程设计的一个变体，这个设计仍然使用单个 <code>io_service::run()</code> 线程来实现协议逻辑。长时间运行或阻塞的任务将被传递给后台线程，一旦完成，结果将被发布回 <code>io_service::run()</code> 线程。</p>
+<p>通过使用无共享消息传递方法（Asio 支持通过 <code>io_service</code> 的成员函数 <code>post()</code> 和 <code>dispatch()</code> 进行消息传递)，程序可以确保 <code>io_service::run()</code> 线程和任何后台工作线程之间不共享对象。因此，仍然不需要显式的同步。</p>
+<h3 id="多个-io-service，分别运行在单独的线程上"><a href="#多个-io-service，分别运行在单独的线程上" class="headerlink" title="多个 io_service，分别运行在单独的线程上"></a>多个 io_service，分别运行在单独的线程上</h3><p>在这个设计中，I/O 对象被分配了一个 “家” io_service，它运行在一个单独的线程上。不同的对象应该只通过消息传递来进行通信。</p>
+<p>这种设计可以更有效地使用多个CPU，同时限制争用资源。不需要显式同步，但处理程序必须保持短且非阻塞。（补充：这种模型在一些开源库有用到，例如 C++ http 框架 <a target="_blank" rel="noopener" href="https://github.com/qicosmos/cinatra">cinatra</a> ，就用到了这种模型）</p>
+<h3 id="单个-io-service，多个线程"><a href="#单个-io-service，多个线程" class="headerlink" title="单个 io_service，多个线程"></a>单个 io_service，多个线程</h3><p>可以从多个线程调用 <code>io_service::run()</code> 函数来为单个 <code>io_service</code> 设置一个线程池。该实现以任意方式在线程之间分配可用的工作。</p>
+<p>由于可以调用完成处理程序，因此可以从任何线程中调用，除非协议实现很简单，并且由单个操作链组成，否则可能需要某种形式的同步。Asio 为了这个目的提供了 <code>io_service::strand</code> 类。</p>
+<p>strand 可以防止并发执行与之相关联的任何完成处理程序。在上面的示例中，我们有一个由三个操作链（用于发送、接收和超时）组成的协议实现，strand 确保相关链的处理程序被序列化。运行在其他链上的其他协议实现仍然能够利用池中的任何其他线程。此外，与互斥锁不同，如果一个strand “正在使用”，它不会阻塞调用线程，而是会切换到在其他线程上运行其他就绪处理程序，以保持线程繁忙。</p>
+<p>与自定义内存分配一样，strand 同步使用与完成处理程序相关联的钩子。也就是说，完成处理程序标识正在执行操作的较大上下文。这个自定义调用钩子允许同步机制扩展到基于操作组合的抽象，我们将在下面看到。</p>
+<p>（补充：这种模型使用起来CPU利用率比较高，但是异步任务会随机分配到空闲线程上执行，因此同步起来比较麻烦，推荐在调用链单一的情况下使用，具体写法可以参考我写的 Socks5 代理服务器 <a target="_blank" rel="noopener" href="https://github.com/xukeawsl/socks-server">socks-server</a> ）</p>
+<h2 id="10-传递责任：开发高效的抽象概念"><a href="#10-传递责任：开发高效的抽象概念" class="headerlink" title="10. 传递责任：开发高效的抽象概念"></a>10. 传递责任：开发高效的抽象概念</h2><p>Asio 的一个关键设计目标是支持创建更高层次的抽象。其主要机制是组成异步操作。在 Asio 的术语中，这些操作被简单地称为“组合操作”。</p>
+<p>例如，考虑一个假设的用户定义的异步操作，该操作实现了从一个套接字读取到另一个套接字的所有数据的传递传输。启动函数可以声明如下：</p>
+<pre class="language-c++" data-language="c++"><code class="language-c++">template &lt;typename Handler&gt;
+void async_transfer(asio::ip::tcp::socket&amp; socket1, asio::ip::tcp::socket&amp; socket2,
+                    std::array&lt;unsigned char, 1024&gt;&amp; working_buffer,
+                    Handler handler);</code></pre>
+
+<p>这个函数将通过两个底层的异步操作来实现：从 <code>socket1</code> 读取和写入 <code>socket2</code> 。每个这些操作都有一个中间完成处理程序，它们之间的关系如下图所示：</p>
+<p><img src="https://s2.loli.net/2022/12/03/IrexhANlqo6UEJn.png"></p>
+<p>这些中间完成处理程序可以通过自定义分配和调用钩子来“传递责任”，从而简单地调用用户的完成处理程序钩子。通过这种方式，组合将内存分配和同步方面的所有选择延迟给抽象的用户。抽象的用户可以在易用性和效率之间选择适当的权衡，并且如果不需要显式同步，则不需要支付任何同步成本。</p>
+<p>Asio提供了许多开箱即用的组合操作，例如非成员函数 <code>async_connect()</code> ，<code>async_write()</code> 和 <code>async_read_until()</code> 。密切相关的组合操作也可以按对象分组，例如 Asio 的 <code>buffered_stream&lt;&gt;</code> 和 <code>ssl::stream&lt;&gt;</code> 模板。</p>
+<h2 id="11-范围和可扩展性"><a href="#11-范围和可扩展性" class="headerlink" title="11. 范围和可扩展性"></a>11. 范围和可扩展性</h2><p>考虑到Asio库的规模，在 <code>WG21</code> 之前的提案被限制在最小可行子集，主要集中于与 TCP 和 UDP 、缓冲区和计时器的网络。然而，Asio 的接口设计允许用户和实现者通过多种机制进行可扩展或扩展。下面将描述其中的一些机制。</p>
+<h3 id="额外的-I-O-服务"><a href="#额外的-I-O-服务" class="headerlink" title="额外的 I/O 服务"></a>额外的 I/O 服务</h3><p>io_service 类实现了一个可扩展的，类型安全的，多态的 I/O 服务集，并按服务类型进行索引。I/O 服务代表 I/O 对象管理操作系统的逻辑接口。特别是，有些资源可以在一类 I/O 对象之间共享。例如，计时器可以根据单个计时器队列来实现。I/O服务管理这些共享资源，并且被设计为在不使用时不产生任何成本。</p>
+<p>Asio实现了额外的I/O服务，以提供对特定操作系统特定功能的访问。例如：</p>
+<ul>
+<li>用于在 HANDLE 上执行重叠 I/O 的 Windows 特定服务</li>
+<li>一种特定于 Windows 的服务，用于等待内核对象，如事件、进程和线程。</li>
+<li>面向流的文件描述符的 POSIX 特定服务</li>
+<li>通过 <code>signal()</code> 或 POSIX <code>sigaction()</code> 安全集成信号处理的服务。</li>
+</ul>
+<p>可以添加新的I/O服务，而不影响库的现有用户。</p>
+<h3 id="套接字类型要求"><a href="#套接字类型要求" class="headerlink" title="套接字类型要求"></a>套接字类型要求</h3><p>尽管基于 Asio 的提议仅限于 TCP 和 UDP 套接字，但该接口是基于类型需求的，如 Protocol 和 Endpoint。这些类型要求旨在允许库使用其他类型的套接字。Asio 库本身已经使用了这些类型的要求来增加对 ICMP 和 UNIX 域套接字的支持。</p>
+<h3 id="流类型要求"><a href="#流类型要求" class="headerlink" title="流类型要求"></a>流类型要求</h3><p>Asio 库为面向同步和异步流的 I/O 定义了几种类型要求。这些类型的要求由 TCP 套接字接口实现，也可以通过抽象如 <code>ssl::stream&lt;&gt;</code> 和 <code>buffered_stream&lt;&gt;</code> 。通过实现这些类型需求，一个类可以与组合的操作一起使用，比如 <code>async_read()</code> ，<code>async_read_until()</code> 和 <code>async_write()</code> 。类型需求也打算用于更高层次的抽象中，例如在 HTTP 上的异步包装器。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:xukeawsl@gmail.com">NumPy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://xukeawsl.gitee.io/2022/12/03/Using-Asio-with-C-11/">https://xukeawsl.gitee.io/2022/12/03/Using-Asio-with-C-11/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C/">C++</a></div><div class="post_share"><div class="social-share" data-image="https://s2.loli.net/2022/12/03/fyvspDjRAi2zxTk.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/"><img class="next-cover" src="https://s2.loli.net/2022/10/07/5AI9NBFSxYibThe.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Oracle笔记</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81NDc3My8zMTI0Mw=="></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">NumPy</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">23</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xukeawsl/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xukeawsl" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xukeawsl@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Asio-%E5%BA%93%E7%9A%84-C-11-%E5%8F%98%E4%BD%93"><span class="toc-number">1.</span> <span class="toc-text">1. Asio 库的 C++11 变体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BD%BF%E7%94%A8-I-O-%E6%B5%81%E8%A7%A3%E5%86%B3%E4%B8%80%E4%BA%9B%E7%AE%80%E5%8D%95%E9%97%AE%E9%A2%98%E7%9A%84%E7%94%A8%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">2. 使用 I&#x2F;O 流解决一些简单问题的用例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BA%86%E8%A7%A3%E5%90%8C%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">3. 了解同步操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E4%BA%86%E8%A7%A3%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="toc-number">4.</span> <span class="toc-text">4. 了解异步操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E8%BF%9E%E9%94%81%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="toc-number">5.</span> <span class="toc-text">5. 连锁异步操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%A4%84%E7%90%86%E9%94%99%E8%AF%AF"><span class="toc-number">6.</span> <span class="toc-text">6. 处理错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E7%AE%A1%E7%90%86%E5%AF%B9%E8%B1%A1%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">7.</span> <span class="toc-text">7. 管理对象生命周期</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E4%BC%98%E5%8C%96%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-number">8.</span> <span class="toc-text">8. 优化内存分配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E5%A4%84%E7%90%86%E5%B9%B6%E5%8F%91"><span class="toc-number">9.</span> <span class="toc-text">9. 处理并发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E7%BA%BF%E7%A8%8B%E8%AE%BE%E8%AE%A1"><span class="toc-number">9.1.</span> <span class="toc-text">单线程设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BA%BF%E7%A8%8B%E6%9D%A5%E6%89%A7%E8%A1%8C%E9%95%BF%E6%97%B6%E9%97%B4%E8%BF%90%E8%A1%8C%E7%9A%84%E4%BB%BB%E5%8A%A1"><span class="toc-number">9.2.</span> <span class="toc-text">使用线程来执行长时间运行的任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AA-io-service%EF%BC%8C%E5%88%86%E5%88%AB%E8%BF%90%E8%A1%8C%E5%9C%A8%E5%8D%95%E7%8B%AC%E7%9A%84%E7%BA%BF%E7%A8%8B%E4%B8%8A"><span class="toc-number">9.3.</span> <span class="toc-text">多个 io_service，分别运行在单独的线程上</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%B8%AA-io-service%EF%BC%8C%E5%A4%9A%E4%B8%AA%E7%BA%BF%E7%A8%8B"><span class="toc-number">9.4.</span> <span class="toc-text">单个 io_service，多个线程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-%E4%BC%A0%E9%80%92%E8%B4%A3%E4%BB%BB%EF%BC%9A%E5%BC%80%E5%8F%91%E9%AB%98%E6%95%88%E7%9A%84%E6%8A%BD%E8%B1%A1%E6%A6%82%E5%BF%B5"><span class="toc-number">10.</span> <span class="toc-text">10. 传递责任：开发高效的抽象概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E8%8C%83%E5%9B%B4%E5%92%8C%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="toc-number">11.</span> <span class="toc-text">11. 范围和可扩展性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%9D%E5%A4%96%E7%9A%84-I-O-%E6%9C%8D%E5%8A%A1"><span class="toc-number">11.1.</span> <span class="toc-text">额外的 I&#x2F;O 服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A5%97%E6%8E%A5%E5%AD%97%E7%B1%BB%E5%9E%8B%E8%A6%81%E6%B1%82"><span class="toc-number">11.2.</span> <span class="toc-text">套接字类型要求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E7%B1%BB%E5%9E%8B%E8%A6%81%E6%B1%82"><span class="toc-number">11.3.</span> <span class="toc-text">流类型要求</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/12/03/Using-Asio-with-C-11/" title="Using Asio with C++11"><img src="https://s2.loli.net/2022/12/03/fyvspDjRAi2zxTk.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Using Asio with C++11"/></a><div class="content"><a class="title" href="/2022/12/03/Using-Asio-with-C-11/" title="Using Asio with C++11">Using Asio with C++11</a><time datetime="2022-12-03T07:13:43.000Z" title="Created 2022-12-03 15:13:43">2022-12-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/" title="Oracle笔记"><img src="https://s2.loli.net/2022/10/07/5AI9NBFSxYibThe.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Oracle笔记"/></a><div class="content"><a class="title" href="/2022/09/30/Oracle%E7%AC%94%E8%AE%B0/" title="Oracle笔记">Oracle笔记</a><time datetime="2022-09-30T02:03:10.000Z" title="Created 2022-09-30 10:03:10">2022-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/24/gdb%E7%AC%94%E8%AE%B0/" title="gdb笔记"><img src="https://s2.loli.net/2022/09/24/AFD3YCpyntiSweE.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="gdb笔记"/></a><div class="content"><a class="title" href="/2022/09/24/gdb%E7%AC%94%E8%AE%B0/" title="gdb笔记">gdb笔记</a><time datetime="2022-09-24T12:25:37.000Z" title="Created 2022-09-24 20:25:37">2022-09-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/" title="网络编程笔记"><img src="https://s2.loli.net/2022/05/16/frVxQGFPMW6UtpI.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="网络编程笔记"/></a><div class="content"><a class="title" href="/2022/05/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0/" title="网络编程笔记">网络编程笔记</a><time datetime="2022-05-16T09:31:55.000Z" title="Created 2022-05-16 17:31:55">2022-05-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/28/MySQL%E7%AC%94%E8%AE%B0/" title="MySQL笔记"><img src="https://s2.loli.net/2022/02/28/a2HsQGWDpOkJvUg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL笔记"/></a><div class="content"><a class="title" href="/2022/02/28/MySQL%E7%AC%94%E8%AE%B0/" title="MySQL笔记">MySQL笔记</a><time datetime="2022-02-28T13:00:47.000Z" title="Created 2022-02-28 21:00:47">2022-02-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2022/12/03/GU34nMwD2XvrsC7.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By NumPy</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
