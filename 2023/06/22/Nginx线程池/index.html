@@ -1,0 +1,819 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nginx线程池 | NumPy's Blog</title><meta name="author" content="NumPy,xukeawsl@gmail.com"><meta name="copyright" content="NumPy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Nginx源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx线程池">
+<meta property="og:url" content="https://xukeawsl.gitee.io/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/index.html">
+<meta property="og:site_name" content="NumPy&#39;s Blog">
+<meta property="og:description" content="Nginx源码">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png">
+<meta property="article:published_time" content="2023-06-22T12:43:07.000Z">
+<meta property="article:modified_time" content="2023-06-22T12:48:47.178Z">
+<meta property="article:author" content="NumPy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png"><link rel="shortcut icon" href="/img/N.png"><link rel="canonical" href="https://xukeawsl.gitee.io/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Nginx线程池',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2023-06-22 20:48:47'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">30</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">9</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">NumPy's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Nginx线程池</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2023-06-22T12:43:07.000Z" title="Created 2023-06-22 20:43:07">2023-06-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2023-06-22T12:48:47.178Z" title="Updated 2023-06-22 20:48:47">2023-06-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/nginx/">nginx</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">3.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>15min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Nginx线程池"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>nginx 一直采用多进程和 I/O 多路复用模型，在大部分场景下都有优秀的性能表现，但有时候耗时的阻塞操作会对性能产生一定的影响，例如从磁盘中读写大文件。因此在 <code>1.7.11</code> 版本 nginx 引入了线程池模块，用于处理耗时的阻塞操作，目前主要是文件读写、<code>sendfile</code>。具体的应用场景和性能分析可以参考以下文章：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.nginx-cn.net/blog/thread-pools-boost-performance-9x/">NGINX 中的线程池将性能提升 9 倍!</a></li>
+</ul>
+<h2 id="Nginx-线程池实现"><a href="#Nginx-线程池实现" class="headerlink" title="Nginx 线程池实现"></a>Nginx 线程池实现</h2><ul>
+<li>使用单链表实现队列结构，有一个等待队列和完成队列分别用于存放还没执行的任务和执行完毕的任务，之所以设计了一个完成队列是为了支持当任务完成后执行相应的回调函数</li>
+<li>数据结构内存分配使用内存池</li>
+<li>使用自旋锁优化并发操作性能，在临界区比较短的时候使用自旋锁可以得到比互斥锁更优的性能，在线程池中主要用在操作完成队列的时候</li>
+<li>子线程 <code>deatch</code> 主线程不用 <code>join</code>，线程池销毁通过向队列中提交任务完成</li>
+</ul>
+<h2 id="Nginx-线程池数据结构"><a href="#Nginx-线程池数据结构" class="headerlink" title="Nginx 线程池数据结构"></a>Nginx 线程池数据结构</h2><h3 id="线程任务结构"><a href="#线程任务结构" class="headerlink" title="线程任务结构"></a>线程任务结构</h3><ul>
+<li>每一个线程任务都拥有一个 <code>id</code> 用于标识</li>
+<li>由于使用链表实现任务独立，因此每个任务拥有指向下一个任务的指针 <code>next</code></li>
+<li>任务所要执行的函数用 <code>handler</code> 表示，其中函数的入参用 <code>ctx</code> 表示</li>
+<li>最后一个 <code>event</code> 用于描述任务的类型等，还能设置事件回调，当任务完成后调用<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">ngx_thread_task_s</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_task_t</span>   <span class="token operator">*</span>next<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_uint_t</span>           id<span class="token punctuation">;</span>
+    <span class="token keyword">void</span>                <span class="token operator">*</span>ctx<span class="token punctuation">;</span>
+    <span class="token keyword">void</span>               <span class="token punctuation">(</span><span class="token operator">*</span>handler<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>data<span class="token punctuation">,</span> <span class="token class-name">ngx_log_t</span> <span class="token operator">*</span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">ngx_event_t</span>          event<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h3 id="线程池任务队列结构"><a href="#线程池任务队列结构" class="headerlink" title="线程池任务队列结构"></a>线程池任务队列结构</h3><ul>
+<li>使用一个 <code>first</code> 一级指针指向队列头节点</li>
+<li>二级指针 <code>last</code> 指向指针变量的地址，这个指针变量为最后一个节点的 <code>next</code> 指针变量地址</li>
+<li>这样设计的好处的不用创建哨兵节点，且可以实现 <code>O(1)</code> 时间复杂度往队尾插入节点，只需要通过 <code>last</code> 改变指针变量所指向节点的地址为新节点地址即可</li>
+<li>初始时 <code>first</code> 由于指向空，故 <code>last</code> 指向 <code>first</code> 的地址，新增节点 <code>task</code> 只需要两步操作：<code>*last = task; task = &amp;task-&gt;next;</code><pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_task_t</span>        <span class="token operator">*</span>first<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_task_t</span>       <span class="token operator">*</span><span class="token operator">*</span>last<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token class-name">ngx_thread_pool_queue_t</span><span class="token punctuation">;</span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">ngx_thread_pool_queue_init</span><span class="token expression"><span class="token punctuation">(</span>q<span class="token punctuation">)</span>                                         </span><span class="token punctuation">\</span>
+    <span class="token expression"><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token operator">-></span>first <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>                                                        </span><span class="token punctuation">\</span>
+    <span class="token expression"><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token operator">-></span>last <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token operator">-></span>first</span></span></code></pre></li>
+</ul>
+<h3 id="线程池结构"><a href="#线程池结构" class="headerlink" title="线程池结构"></a>线程池结构</h3><ul>
+<li>互斥锁 <code>mtx</code> 用于安全从任务队列 <code>queue</code> 中取任务，互斥锁带错误检查，可以防止在同一个线程获取锁两次而造成死锁的问题</li>
+<li>当前任务队列中的任务数量用 <code>waiting</code> 表示，其不能超过 <code>max_queue</code> 最大队列大小限制</li>
+<li>当新增一个任务时，信号量 <code>cond</code> 用于通知工作线程去抢夺任务</li>
+<li>线程池的名字用 <code>name</code> 标识，默认为 <code>default</code> </li>
+<li>线程池中的线程池数量用 <code>threads</code> 表示<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">ngx_thread_pool_s</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_mutex_t</span>        mtx<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_queue_t</span>   queue<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_int_t</span>                 waiting<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_cond_t</span>         cond<span class="token punctuation">;</span>
+
+    <span class="token class-name">ngx_log_t</span>                <span class="token operator">*</span>log<span class="token punctuation">;</span>
+
+    <span class="token class-name">ngx_str_t</span>                 name<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_uint_t</span>                threads<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_int_t</span>                 max_queue<span class="token punctuation">;</span>
+
+    u_char                   <span class="token operator">*</span>file<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_uint_t</span>                line<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h2 id="Nginx-线程池操作"><a href="#Nginx-线程池操作" class="headerlink" title="Nginx 线程池操作"></a>Nginx 线程池操作</h2><h3 id="线程池初始化"><a href="#线程池初始化" class="headerlink" title="线程池初始化"></a>线程池初始化</h3><ul>
+<li>初始化任务队列和线程，将线程属性设置为分离（<code>detach</code>）</li>
+<li>创建指定数量线程去执行周期任务 <code>ngx_thread_pool_cycle</code><pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token class-name">ngx_int_t</span>
+<span class="token function">ngx_thread_pool_init</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>tp<span class="token punctuation">,</span> <span class="token class-name">ngx_log_t</span> <span class="token operator">*</span>log<span class="token punctuation">,</span> <span class="token class-name">ngx_pool_t</span> <span class="token operator">*</span>pool<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span>             err<span class="token punctuation">;</span>
+    <span class="token class-name">pthread_t</span>       tid<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_uint_t</span>      n<span class="token punctuation">;</span>
+    <span class="token class-name">pthread_attr_t</span>  attr<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ngx_notify <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+               <span class="token string">"the configured event method cannot be used with thread pools"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token function">ngx_thread_pool_queue_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>queue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_mutex_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_cond_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>cond<span class="token punctuation">,</span> log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tp<span class="token operator">-></span>log <span class="token operator">=</span> log<span class="token punctuation">;</span>
+
+    err <span class="token operator">=</span> <span class="token function">pthread_attr_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>attr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> log<span class="token punctuation">,</span> err<span class="token punctuation">,</span>
+                      <span class="token string">"pthread_attr_init() failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    err <span class="token operator">=</span> <span class="token function">pthread_attr_setdetachstate</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>attr<span class="token punctuation">,</span> PTHREAD_CREATE_DETACHED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> log<span class="token punctuation">,</span> err<span class="token punctuation">,</span>
+                      <span class="token string">"pthread_attr_setdetachstate() failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression"><span class="token number">0</span></span></span>
+    err <span class="token operator">=</span> <span class="token function">pthread_attr_setstacksize</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>attr<span class="token punctuation">,</span> PTHREAD_STACK_MIN<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> log<span class="token punctuation">,</span> err<span class="token punctuation">,</span>
+                      <span class="token string">"pthread_attr_setstacksize() failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> n <span class="token operator">&lt;</span> tp<span class="token operator">-></span>threads<span class="token punctuation">;</span> n<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        err <span class="token operator">=</span> <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tid<span class="token punctuation">,</span> <span class="token operator">&amp;</span>attr<span class="token punctuation">,</span> ngx_thread_pool_cycle<span class="token punctuation">,</span> tp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> log<span class="token punctuation">,</span> err<span class="token punctuation">,</span>
+                          <span class="token string">"pthread_create() failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">pthread_attr_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>attr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> NGX_OK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="线程周期任务"><a href="#线程周期任务" class="headerlink" title="线程周期任务"></a>线程周期任务</h3><ul>
+<li>为了防止信号使线程异常终止，将 <code>SIGILL</code>、<code>SIGFPE</code>、<code>SIGSEGV</code> 和 <code>SIGBUS</code> 之外的所有信号都屏蔽</li>
+<li>对于每个工作线程来说，首先尝试获取任务队列互斥锁，然后将等待的任务数量减一（由于队列可能为空，故这里有可能为负数）</li>
+<li>然后使用条件变量等待任务队列不为空，如果等待操作报错则<strong>解锁后</strong>直接退出，同时为了避免<strong>虚假唤醒</strong>，判断条件使用 <code>while</code> 而不是 <code>if</code></li>
+<li>取出队列头部元素（移动 <code>first</code> 指针），若队列为空，需要重设 <code>last</code> 指针变量（重要细节）</li>
+<li>解锁后再执行任务（常见优化方式，执行任务时不需要持有锁）</li>
+<li>获取自旋锁，然后将任务添加到完成队列中，最后解锁即可，这里有个细节，在解锁操作前加了一个内存屏障，这是因为解锁操作实际上是一个原子变量赋值运算宏，为了防止 <code>cpu</code> 指令重排将赋值操作放到完成队列操作之前，需要加上内存屏障，保证解锁操作在完成队列操作之后</li>
+<li>通知事件循环去执行任务完成后的回调函数<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool_cycle</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>data<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>tp <span class="token operator">=</span> data<span class="token punctuation">;</span>
+
+    <span class="token keyword">int</span>                 err<span class="token punctuation">;</span>
+    <span class="token class-name">sigset_t</span>            set<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_task_t</span>  <span class="token operator">*</span>task<span class="token punctuation">;</span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression"><span class="token number">0</span></span></span>
+    <span class="token function">ngx_time_update</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+
+    <span class="token function">ngx_log_debug1</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                   <span class="token string">"thread in pool \"%V\" started"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">sigfillset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>set<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">sigdelset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>set<span class="token punctuation">,</span> SIGILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sigdelset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>set<span class="token punctuation">,</span> SIGFPE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sigdelset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>set<span class="token punctuation">,</span> SIGSEGV<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sigdelset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>set<span class="token punctuation">,</span> SIGBUS<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    err <span class="token operator">=</span> <span class="token function">pthread_sigmask</span><span class="token punctuation">(</span>SIG_BLOCK<span class="token punctuation">,</span> <span class="token operator">&amp;</span>set<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> err<span class="token punctuation">,</span> <span class="token string">"pthread_sigmask() failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token punctuation">;</span><span class="token punctuation">;</span> <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token comment">/* the number may become negative */</span>
+        tp<span class="token operator">-></span>waiting<span class="token operator">--</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>first <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_cond_wait</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>cond<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span>
+                <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span>
+            <span class="token punctuation">&#123;</span>
+                <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+
+        task <span class="token operator">=</span> tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>first<span class="token punctuation">;</span>
+        tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>first <span class="token operator">=</span> task<span class="token operator">-></span>next<span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>first <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>last <span class="token operator">=</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>first<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression"><span class="token number">0</span></span></span>
+        <span class="token function">ngx_time_update</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+
+        <span class="token function">ngx_log_debug2</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                       <span class="token string">"run task #%ui in thread pool \"%V\""</span><span class="token punctuation">,</span>
+                       task<span class="token operator">-></span>id<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        task<span class="token operator">-></span><span class="token function">handler</span><span class="token punctuation">(</span>task<span class="token operator">-></span>ctx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">ngx_log_debug2</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                       <span class="token string">"complete task #%ui in thread pool \"%V\""</span><span class="token punctuation">,</span>
+                       task<span class="token operator">-></span>id<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        task<span class="token operator">-></span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+        <span class="token function">ngx_spinlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ngx_thread_pool_done_lock<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2048</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token operator">*</span>ngx_thread_pool_done<span class="token punctuation">.</span>last <span class="token operator">=</span> task<span class="token punctuation">;</span>
+        ngx_thread_pool_done<span class="token punctuation">.</span>last <span class="token operator">=</span> <span class="token operator">&amp;</span>task<span class="token operator">-></span>next<span class="token punctuation">;</span>
+
+        <span class="token function">ngx_memory_barrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">ngx_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ngx_thread_pool_done_lock<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_notify</span><span class="token punctuation">(</span>ngx_thread_pool_handler<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="任务完成事件回调"><a href="#任务完成事件回调" class="headerlink" title="任务完成事件回调"></a>任务完成事件回调</h3><ul>
+<li>将完成队列的任务都取出来，然后重置完成队列（自旋锁临界区完成）</li>
+<li>遍历队列，将事件置为完成状态且任务不活跃（不是正在执行或处于等待队列中）</li>
+<li>执行事件回调函数<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span>
+<span class="token function">ngx_thread_pool_handler</span><span class="token punctuation">(</span><span class="token class-name">ngx_event_t</span> <span class="token operator">*</span>ev<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_event_t</span>        <span class="token operator">*</span>event<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_task_t</span>  <span class="token operator">*</span>task<span class="token punctuation">;</span>
+
+    <span class="token function">ngx_log_debug0</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> ev<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"thread pool handler"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">ngx_spinlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ngx_thread_pool_done_lock<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2048</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    task <span class="token operator">=</span> ngx_thread_pool_done<span class="token punctuation">.</span>first<span class="token punctuation">;</span>
+    ngx_thread_pool_done<span class="token punctuation">.</span>first <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    ngx_thread_pool_done<span class="token punctuation">.</span>last <span class="token operator">=</span> <span class="token operator">&amp;</span>ngx_thread_pool_done<span class="token punctuation">.</span>first<span class="token punctuation">;</span>
+
+    <span class="token function">ngx_memory_barrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">ngx_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ngx_thread_pool_done_lock<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>task<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_debug1</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> ev<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                       <span class="token string">"run completion handler for task #%ui"</span><span class="token punctuation">,</span> task<span class="token operator">-></span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        event <span class="token operator">=</span> <span class="token operator">&amp;</span>task<span class="token operator">-></span>event<span class="token punctuation">;</span>
+        task <span class="token operator">=</span> task<span class="token operator">-></span>next<span class="token punctuation">;</span>
+
+        event<span class="token operator">-></span>complete <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        event<span class="token operator">-></span>active <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+        event<span class="token operator">-></span><span class="token function">handler</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="线程池销毁"><a href="#线程池销毁" class="headerlink" title="线程池销毁"></a>线程池销毁</h3><ul>
+<li>向线程池中推送一个终止当前线程的任务，同时传入一个变量 <code>lock</code> 标识线程终止任务是否被执行（0：执行完毕，1：未执行）</li>
+<li>主线程不能使用 <code>join</code> 等待线程结束，因为线程的 <code>detach</code> 的，因此用 <code>while</code> 循环轮询检查标志变量，为了缓解 <code>cpu</code> 轮询产生的开销，每次循环都会重新调度一下线程</li>
+<li>任务完成后将 <code>active</code> 重置为 <code>0</code> 复用，因为执行这个任务后线程就会退出，不会进入完成队列执行事件回调将 <code>active</code> 状态更新为 <code>0</code> ，所以需要手动更新</li>
+<li>销毁线程池的条件变量和互斥锁<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span>
+<span class="token function">ngx_thread_pool_destroy</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>tp<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_uint_t</span>           n<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_task_t</span>    task<span class="token punctuation">;</span>
+    <span class="token keyword">volatile</span> <span class="token class-name">ngx_uint_t</span>  lock<span class="token punctuation">;</span>
+
+    <span class="token function">ngx_memzero</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>task<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_task_t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    task<span class="token punctuation">.</span>handler <span class="token operator">=</span> ngx_thread_pool_exit_handler<span class="token punctuation">;</span>
+    task<span class="token punctuation">.</span>ctx <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span>lock<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> n <span class="token operator">&lt;</span> tp<span class="token operator">-></span>threads<span class="token punctuation">;</span> n<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        lock <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_task_post</span><span class="token punctuation">(</span>tp<span class="token punctuation">,</span> <span class="token operator">&amp;</span>task<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">ngx_sched_yield</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        task<span class="token punctuation">.</span>event<span class="token punctuation">.</span>active <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_cond_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>cond<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="线程终止函数"><a href="#线程终止函数" class="headerlink" title="线程终止函数"></a>线程终止函数</h3><ul>
+<li>将传入的标志变量更新为 <code>0</code> ，表示此任务被执行</li>
+<li>使用 <code>pthread_exit</code> 使当前线程退出（注意与 <code>return</code> 的区别）<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span>
+<span class="token function">ngx_thread_pool_exit_handler</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>data<span class="token punctuation">,</span> <span class="token class-name">ngx_log_t</span> <span class="token operator">*</span>log<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_uint_t</span> <span class="token operator">*</span>lock <span class="token operator">=</span> data<span class="token punctuation">;</span>
+
+    <span class="token operator">*</span>lock <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+    <span class="token function">pthread_exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="创建线程池任务结构"><a href="#创建线程池任务结构" class="headerlink" title="创建线程池任务结构"></a>创建线程池任务结构</h3><ul>
+<li>使用内存池分配内存，<code>size</code> 为存储上下文 <code>ctx</code> 所需的内存大小，即线程任务的入参（这部分内存无需用户分配）<pre class="language-c" data-language="c"><code class="language-c"><span class="token class-name">ngx_thread_task_t</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_task_alloc</span><span class="token punctuation">(</span><span class="token class-name">ngx_pool_t</span> <span class="token operator">*</span>pool<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_task_t</span>  <span class="token operator">*</span>task<span class="token punctuation">;</span>
+
+    task <span class="token operator">=</span> <span class="token function">ngx_pcalloc</span><span class="token punctuation">(</span>pool<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_task_t</span><span class="token punctuation">)</span> <span class="token operator">+</span> size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>task <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    task<span class="token operator">-></span>ctx <span class="token operator">=</span> task <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> task<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="为线程池添加任务"><a href="#为线程池添加任务" class="headerlink" title="为线程池添加任务"></a>为线程池添加任务</h3><ul>
+<li>已经处于活跃状态（<code>active</code> 为 <code>1</code>）的任务不允许添加</li>
+<li>获取任务队列互斥锁，判断当前等待执行的任务数是否小于最大数量限制，如果超限则释放锁并返回错误</li>
+<li>将任务置为活跃状态，为其分配任务 id，初始时 <code>next</code> 为空</li>
+<li>唤醒一个等待的工作线程并将任务添加到队列中，等待任务数 <code>waiting</code> 增加，最后释放互斥锁（这里唤醒和添加到队列的操作先后关系无所谓，因为当前线程持有互斥锁，唤醒的线程需要阻塞等待锁释放）<pre class="language-c" data-language="c"><code class="language-c"><span class="token class-name">ngx_int_t</span>
+<span class="token function">ngx_thread_task_post</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>tp<span class="token punctuation">,</span> <span class="token class-name">ngx_thread_task_t</span> <span class="token operator">*</span>task<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>task<span class="token operator">-></span>event<span class="token punctuation">.</span>active<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ALERT<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                      <span class="token string">"task #%ui already active"</span><span class="token punctuation">,</span> task<span class="token operator">-></span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>waiting <span class="token operator">>=</span> tp<span class="token operator">-></span>max_queue<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_ERR<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                      <span class="token string">"thread pool \"%V\" queue overflow: %i tasks waiting"</span><span class="token punctuation">,</span>
+                      <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">,</span> tp<span class="token operator">-></span>waiting<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    task<span class="token operator">-></span>event<span class="token punctuation">.</span>active <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+    task<span class="token operator">-></span>id <span class="token operator">=</span> ngx_thread_pool_task_id<span class="token operator">++</span><span class="token punctuation">;</span>
+    task<span class="token operator">-></span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_cond_signal</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>cond<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token operator">*</span>tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>last <span class="token operator">=</span> task<span class="token punctuation">;</span>
+    tp<span class="token operator">-></span>queue<span class="token punctuation">.</span>last <span class="token operator">=</span> <span class="token operator">&amp;</span>task<span class="token operator">-></span>next<span class="token punctuation">;</span>
+
+    tp<span class="token operator">-></span>waiting<span class="token operator">++</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token function">ngx_thread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tp<span class="token operator">-></span>mtx<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">ngx_log_debug2</span><span class="token punctuation">(</span>NGX_LOG_DEBUG_CORE<span class="token punctuation">,</span> tp<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                   <span class="token string">"task #%ui added to thread pool \"%V\""</span><span class="token punctuation">,</span>
+                   task<span class="token operator">-></span>id<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> NGX_OK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h2 id="Nginx-线程池模块运作"><a href="#Nginx-线程池模块运作" class="headerlink" title="Nginx 线程池模块运作"></a>Nginx 线程池模块运作</h2><p>nginx 可以为多个 <code>location</code> 配置各自的线程池，默认的线程池名字为 <code>default</code> ，线程数 <code>32</code> ，最大队列大小为 <code>65536</code>。可以根据需要自己添加线程池，即一个 <code>worker</code> 进程可以有多个线程池，因此 nginx 需要读取配置，然后初始化线程池数组。然后模块加载时依次初始化这些线程池，卸载时停止这些线程池。</p>
+<h3 id="线程池数组"><a href="#线程池数组" class="headerlink" title="线程池数组"></a>线程池数组</h3><ul>
+<li>使用 nginx 内置的数组，支持动态扩容且使用内存池分配<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_array_t</span>               pools<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token class-name">ngx_thread_pool_conf_t</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h3 id="定义模块加载时的指令和上下文"><a href="#定义模块加载时的指令和上下文" class="headerlink" title="定义模块加载时的指令和上下文"></a>定义模块加载时的指令和上下文</h3><ul>
+<li>设置创建和初始化线程池数组的方法</li>
+<li><code>thread_pool</code> 为配置标识，解析的时候用于标志，如 <code>thread_pool default threads=32 max_queue=65536</code><pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token class-name">ngx_command_t</span>  ngx_thread_pool_commands<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+
+    <span class="token punctuation">&#123;</span> <span class="token function">ngx_string</span><span class="token punctuation">(</span><span class="token string">"thread_pool"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      NGX_MAIN_CONF<span class="token operator">|</span>NGX_DIRECT_CONF<span class="token operator">|</span>NGX_CONF_TAKE23<span class="token punctuation">,</span>
+      ngx_thread_pool<span class="token punctuation">,</span>
+      <span class="token number">0</span><span class="token punctuation">,</span>
+      <span class="token number">0</span><span class="token punctuation">,</span>
+      <span class="token constant">NULL</span> <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+
+      ngx_null_command
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+
+<span class="token keyword">static</span> <span class="token class-name">ngx_core_module_t</span>  ngx_thread_pool_module_ctx <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">ngx_string</span><span class="token punctuation">(</span><span class="token string">"thread_pool"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    ngx_thread_pool_create_conf<span class="token punctuation">,</span>
+    ngx_thread_pool_init_conf
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h3 id="定义模块工作流"><a href="#定义模块工作流" class="headerlink" title="定义模块工作流"></a>定义模块工作流</h3><ul>
+<li>指定了模块上下文、指令以及 <code>worker</code> 进程初始化和退出时要执行的操作<pre class="language-c" data-language="c"><code class="language-c"><span class="token class-name">ngx_module_t</span>  ngx_thread_pool_module <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    NGX_MODULE_V1<span class="token punctuation">,</span>
+    <span class="token operator">&amp;</span>ngx_thread_pool_module_ctx<span class="token punctuation">,</span>           <span class="token comment">/* module context */</span>
+    ngx_thread_pool_commands<span class="token punctuation">,</span>              <span class="token comment">/* module directives */</span>
+    NGX_CORE_MODULE<span class="token punctuation">,</span>                       <span class="token comment">/* module type */</span>
+    <span class="token constant">NULL</span><span class="token punctuation">,</span>                                  <span class="token comment">/* init master */</span>
+    <span class="token constant">NULL</span><span class="token punctuation">,</span>                                  <span class="token comment">/* init module */</span>
+    ngx_thread_pool_init_worker<span class="token punctuation">,</span>           <span class="token comment">/* init process */</span>
+    <span class="token constant">NULL</span><span class="token punctuation">,</span>                                  <span class="token comment">/* init thread */</span>
+    <span class="token constant">NULL</span><span class="token punctuation">,</span>                                  <span class="token comment">/* exit thread */</span>
+    ngx_thread_pool_exit_worker<span class="token punctuation">,</span>           <span class="token comment">/* exit process */</span>
+    <span class="token constant">NULL</span><span class="token punctuation">,</span>                                  <span class="token comment">/* exit master */</span>
+    NGX_MODULE_V1_PADDING
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h3 id="解析配置"><a href="#解析配置" class="headerlink" title="解析配置"></a>解析配置</h3><ul>
+<li>取配置参数数组的第一项的 <code>value[1]</code> （即线程池名字），将其添加到线程池数组中</li>
+<li>如果线程数存在，说明之前添加过这个线程池了（新加的线程池线程池为 <code>0</code>）</li>
+<li>设置默认队列大小为 <code>65536</code> ，这样如果用户没有设置，就使用默认的队列大小</li>
+<li>从第三个参数开始遍历，即线程数和队列大小，如果没有指定线程数或者线程数不正确则报错<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">char</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool</span><span class="token punctuation">(</span><span class="token class-name">ngx_conf_t</span> <span class="token operator">*</span>cf<span class="token punctuation">,</span> <span class="token class-name">ngx_command_t</span> <span class="token operator">*</span>cmd<span class="token punctuation">,</span> <span class="token keyword">void</span> <span class="token operator">*</span>conf<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_str_t</span>          <span class="token operator">*</span>value<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_uint_t</span>          i<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>  <span class="token operator">*</span>tp<span class="token punctuation">;</span>
+
+    value <span class="token operator">=</span> cf<span class="token operator">-></span>args<span class="token operator">-></span>elts<span class="token punctuation">;</span>
+
+    tp <span class="token operator">=</span> <span class="token function">ngx_thread_pool_add</span><span class="token punctuation">(</span>cf<span class="token punctuation">,</span> <span class="token operator">&amp;</span>value<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>threads<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_conf_log_error</span><span class="token punctuation">(</span>NGX_LOG_EMERG<span class="token punctuation">,</span> cf<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                           <span class="token string">"duplicate thread pool \"%V\""</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>tp<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tp<span class="token operator">-></span>max_queue <span class="token operator">=</span> <span class="token number">65536</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> cf<span class="token operator">-></span>args<span class="token operator">-></span>nelts<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_strncmp</span><span class="token punctuation">(</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>data<span class="token punctuation">,</span> <span class="token string">"threads="</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+            tp<span class="token operator">-></span>threads <span class="token operator">=</span> <span class="token function">ngx_atoi</span><span class="token punctuation">(</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>data <span class="token operator">+</span> <span class="token number">8</span><span class="token punctuation">,</span> value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>len <span class="token operator">-</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>threads <span class="token operator">==</span> <span class="token punctuation">(</span><span class="token class-name">ngx_uint_t</span><span class="token punctuation">)</span> NGX_ERROR <span class="token operator">||</span> tp<span class="token operator">-></span>threads <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">ngx_conf_log_error</span><span class="token punctuation">(</span>NGX_LOG_EMERG<span class="token punctuation">,</span> cf<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                                   <span class="token string">"invalid threads value \"%V\""</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_strncmp</span><span class="token punctuation">(</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>data<span class="token punctuation">,</span> <span class="token string">"max_queue="</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+            tp<span class="token operator">-></span>max_queue <span class="token operator">=</span> <span class="token function">ngx_atoi</span><span class="token punctuation">(</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>data <span class="token operator">+</span> <span class="token number">10</span><span class="token punctuation">,</span> value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>len <span class="token operator">-</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>max_queue <span class="token operator">==</span> NGX_ERROR<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">ngx_conf_log_error</span><span class="token punctuation">(</span>NGX_LOG_EMERG<span class="token punctuation">,</span> cf<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                                   <span class="token string">"invalid max_queue value \"%V\""</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>value<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token operator">-></span>threads <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_conf_log_error</span><span class="token punctuation">(</span>NGX_LOG_EMERG<span class="token punctuation">,</span> cf<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                           <span class="token string">"\"%V\" must have \"threads\" parameter"</span><span class="token punctuation">,</span>
+                           <span class="token operator">&amp;</span>cmd<span class="token operator">-></span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">return</span> NGX_CONF_OK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="根据线程池名添加线程池"><a href="#根据线程池名添加线程池" class="headerlink" title="根据线程池名添加线程池"></a>根据线程池名添加线程池</h3><ul>
+<li>如果线程池已存在则直接返回，否则新分配一个线程池并加入到线程池数组中<pre class="language-c" data-language="c"><code class="language-c"><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool_add</span><span class="token punctuation">(</span><span class="token class-name">ngx_conf_t</span> <span class="token operator">*</span>cf<span class="token punctuation">,</span> <span class="token class-name">ngx_str_t</span> <span class="token operator">*</span>name<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>       <span class="token operator">*</span>tp<span class="token punctuation">,</span> <span class="token operator">*</span><span class="token operator">*</span>tpp<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span>  <span class="token operator">*</span>tcf<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>name <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        name <span class="token operator">=</span> <span class="token operator">&amp;</span>ngx_thread_pool_default<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tp <span class="token operator">=</span> <span class="token function">ngx_thread_pool_get</span><span class="token punctuation">(</span>cf<span class="token operator">-></span>cycle<span class="token punctuation">,</span> name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> tp<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tp <span class="token operator">=</span> <span class="token function">ngx_pcalloc</span><span class="token punctuation">(</span>cf<span class="token operator">-></span>pool<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tp <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tp<span class="token operator">-></span>name <span class="token operator">=</span> <span class="token operator">*</span>name<span class="token punctuation">;</span>
+    tp<span class="token operator">-></span>file <span class="token operator">=</span> cf<span class="token operator">-></span>conf_file<span class="token operator">-></span>file<span class="token punctuation">.</span>name<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
+    tp<span class="token operator">-></span>line <span class="token operator">=</span> cf<span class="token operator">-></span>conf_file<span class="token operator">-></span>line<span class="token punctuation">;</span>
+
+    tcf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_conf_t</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">ngx_get_conf</span><span class="token punctuation">(</span>cf<span class="token operator">-></span>cycle<span class="token operator">-></span>conf_ctx<span class="token punctuation">,</span>
+                                                  ngx_thread_pool_module<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    tpp <span class="token operator">=</span> <span class="token function">ngx_array_push</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tcf<span class="token operator">-></span>pools<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tpp <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token operator">*</span>tpp <span class="token operator">=</span> tp<span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> tp<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="根据线程池名获取线程池"><a href="#根据线程池名获取线程池" class="headerlink" title="根据线程池名获取线程池"></a>根据线程池名获取线程池</h3><ul>
+<li>遍历线程池数组，检查有无和名字匹配的线程池<pre class="language-c" data-language="c"><code class="language-c"><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool_get</span><span class="token punctuation">(</span><span class="token class-name">ngx_cycle_t</span> <span class="token operator">*</span>cycle<span class="token punctuation">,</span> <span class="token class-name">ngx_str_t</span> <span class="token operator">*</span>name<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_uint_t</span>                i<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>       <span class="token operator">*</span><span class="token operator">*</span>tpp<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span>   <span class="token operator">*</span>tcf<span class="token punctuation">;</span>
+
+    tcf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_conf_t</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">ngx_get_conf</span><span class="token punctuation">(</span>cycle<span class="token operator">-></span>conf_ctx<span class="token punctuation">,</span>
+                                                  ngx_thread_pool_module<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    tpp <span class="token operator">=</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>elts<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>nelts<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>name<span class="token punctuation">.</span>len <span class="token operator">==</span> name<span class="token operator">-></span>len
+            <span class="token operator">&amp;&amp;</span> <span class="token function">ngx_strncmp</span><span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>name<span class="token punctuation">.</span>data<span class="token punctuation">,</span> name<span class="token operator">-></span>data<span class="token punctuation">,</span> name<span class="token operator">-></span>len<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="创建线程池配置"><a href="#创建线程池配置" class="headerlink" title="创建线程池配置"></a>创建线程池配置</h3><ul>
+<li>数组的大小初始化为 <code>4</code> ，每个元素为线程池指针<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool_create_conf</span><span class="token punctuation">(</span><span class="token class-name">ngx_cycle_t</span> <span class="token operator">*</span>cycle<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span>  <span class="token operator">*</span>tcf<span class="token punctuation">;</span>
+
+    tcf <span class="token operator">=</span> <span class="token function">ngx_pcalloc</span><span class="token punctuation">(</span>cycle<span class="token operator">-></span>pool<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_conf_t</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tcf <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_array_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tcf<span class="token operator">-></span>pools<span class="token punctuation">,</span> cycle<span class="token operator">-></span>pool<span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span>
+                       <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_t</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">return</span> tcf<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="初始化线程池配置"><a href="#初始化线程池配置" class="headerlink" title="初始化线程池配置"></a>初始化线程池配置</h3><ul>
+<li>遍历线程池数组，已经设置过具体配置的线程池无需配置，未设置过的线程池如果名字和默认名字相同，则使用默认配置<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">char</span> <span class="token operator">*</span>
+<span class="token function">ngx_thread_pool_init_conf</span><span class="token punctuation">(</span><span class="token class-name">ngx_cycle_t</span> <span class="token operator">*</span>cycle<span class="token punctuation">,</span> <span class="token keyword">void</span> <span class="token operator">*</span>conf<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span> <span class="token operator">*</span>tcf <span class="token operator">=</span> conf<span class="token punctuation">;</span>
+
+    <span class="token class-name">ngx_uint_t</span>           i<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>  <span class="token operator">*</span><span class="token operator">*</span>tpp<span class="token punctuation">;</span>
+
+    tpp <span class="token operator">=</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>elts<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>nelts<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>threads<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>name<span class="token punctuation">.</span>len <span class="token operator">==</span> ngx_thread_pool_default<span class="token punctuation">.</span>len
+            <span class="token operator">&amp;&amp;</span> <span class="token function">ngx_strncmp</span><span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>name<span class="token punctuation">.</span>data<span class="token punctuation">,</span> ngx_thread_pool_default<span class="token punctuation">.</span>data<span class="token punctuation">,</span>
+                           ngx_thread_pool_default<span class="token punctuation">.</span>len<span class="token punctuation">)</span>
+               <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token punctuation">&#123;</span>
+            tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>threads <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">;</span>
+            tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>max_queue <span class="token operator">=</span> <span class="token number">65536</span><span class="token punctuation">;</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token function">ngx_log_error</span><span class="token punctuation">(</span>NGX_LOG_EMERG<span class="token punctuation">,</span> cycle<span class="token operator">-></span>log<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                      <span class="token string">"unknown thread pool \"%V\" in %s:%ui"</span><span class="token punctuation">,</span>
+                      <span class="token operator">&amp;</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>name<span class="token punctuation">,</span> tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>file<span class="token punctuation">,</span> tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-></span>line<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> NGX_CONF_ERROR<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">return</span> NGX_CONF_OK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="工作进程初始化"><a href="#工作进程初始化" class="headerlink" title="工作进程初始化"></a>工作进程初始化</h3><ul>
+<li>如果不是 <code>worker</code> 进程或多进程则不使用线程池模块工作</li>
+<li>解析配置文件得到线程池数组</li>
+<li>初始化线程池完成队列</li>
+<li>根据配置初始化线程池<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token class-name">ngx_int_t</span>
+<span class="token function">ngx_thread_pool_init_worker</span><span class="token punctuation">(</span><span class="token class-name">ngx_cycle_t</span> <span class="token operator">*</span>cycle<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_uint_t</span>                i<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>       <span class="token operator">*</span><span class="token operator">*</span>tpp<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span>   <span class="token operator">*</span>tcf<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ngx_process <span class="token operator">!=</span> NGX_PROCESS_WORKER
+        <span class="token operator">&amp;&amp;</span> ngx_process <span class="token operator">!=</span> NGX_PROCESS_SINGLE<span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NGX_OK<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tcf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_conf_t</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">ngx_get_conf</span><span class="token punctuation">(</span>cycle<span class="token operator">-></span>conf_ctx<span class="token punctuation">,</span>
+                                                  ngx_thread_pool_module<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tcf <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NGX_OK<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token function">ngx_thread_pool_queue_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ngx_thread_pool_done<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    tpp <span class="token operator">=</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>elts<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>nelts<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ngx_thread_pool_init</span><span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> cycle<span class="token operator">-></span>log<span class="token punctuation">,</span> cycle<span class="token operator">-></span>pool<span class="token punctuation">)</span> <span class="token operator">!=</span> NGX_OK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> NGX_ERROR<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">return</span> NGX_OK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="工作进程终止"><a href="#工作进程终止" class="headerlink" title="工作进程终止"></a>工作进程终止</h3><ul>
+<li>遍历线程池数组并依次销毁<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">void</span>
+<span class="token function">ngx_thread_pool_exit_worker</span><span class="token punctuation">(</span><span class="token class-name">ngx_cycle_t</span> <span class="token operator">*</span>cycle<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token class-name">ngx_uint_t</span>                i<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_t</span>       <span class="token operator">*</span><span class="token operator">*</span>tpp<span class="token punctuation">;</span>
+    <span class="token class-name">ngx_thread_pool_conf_t</span>   <span class="token operator">*</span>tcf<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ngx_process <span class="token operator">!=</span> NGX_PROCESS_WORKER
+        <span class="token operator">&amp;&amp;</span> ngx_process <span class="token operator">!=</span> NGX_PROCESS_SINGLE<span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tcf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ngx_thread_pool_conf_t</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">ngx_get_conf</span><span class="token punctuation">(</span>cycle<span class="token operator">-></span>conf_ctx<span class="token punctuation">,</span>
+                                                  ngx_thread_pool_module<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>tcf <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    tpp <span class="token operator">=</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>elts<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> tcf<span class="token operator">-></span>pools<span class="token punctuation">.</span>nelts<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ngx_thread_pool_destroy</span><span class="token punctuation">(</span>tpp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:xukeawsl@gmail.com">NumPy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://xukeawsl.gitee.io/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/">https://xukeawsl.gitee.io/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/06/19/Nginx%E8%87%AA%E6%97%8B%E9%94%81/"><img class="next-cover" src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Nginx自旋锁</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">NumPy</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">30</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">9</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xukeawsl/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xukeawsl" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xukeawsl@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">Nginx 线程池实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">Nginx 线程池数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E4%BB%BB%E5%8A%A1%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">线程任务结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BB%BB%E5%8A%A1%E9%98%9F%E5%88%97%E7%BB%93%E6%9E%84"><span class="toc-number">3.2.</span> <span class="toc-text">线程池任务队列结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%BB%93%E6%9E%84"><span class="toc-number">3.3.</span> <span class="toc-text">线程池结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%93%8D%E4%BD%9C"><span class="toc-number">4.</span> <span class="toc-text">Nginx 线程池操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">4.1.</span> <span class="toc-text">线程池初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%91%A8%E6%9C%9F%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.2.</span> <span class="toc-text">线程周期任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E4%BA%8B%E4%BB%B6%E5%9B%9E%E8%B0%83"><span class="toc-number">4.3.</span> <span class="toc-text">任务完成事件回调</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%94%80%E6%AF%81"><span class="toc-number">4.4.</span> <span class="toc-text">线程池销毁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E7%BB%88%E6%AD%A2%E5%87%BD%E6%95%B0"><span class="toc-number">4.5.</span> <span class="toc-text">线程终止函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%BB%BB%E5%8A%A1%E7%BB%93%E6%9E%84"><span class="toc-number">4.6.</span> <span class="toc-text">创建线程池任务结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%B7%BB%E5%8A%A0%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.7.</span> <span class="toc-text">为线程池添加任务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A8%A1%E5%9D%97%E8%BF%90%E4%BD%9C"><span class="toc-number">5.</span> <span class="toc-text">Nginx 线程池模块运作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%95%B0%E7%BB%84"><span class="toc-number">5.1.</span> <span class="toc-text">线程池数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9D%97%E5%8A%A0%E8%BD%BD%E6%97%B6%E7%9A%84%E6%8C%87%E4%BB%A4%E5%92%8C%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-number">5.2.</span> <span class="toc-text">定义模块加载时的指令和上下文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9D%97%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">5.3.</span> <span class="toc-text">定义模块工作流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90%E9%85%8D%E7%BD%AE"><span class="toc-number">5.4.</span> <span class="toc-text">解析配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%90%8D%E6%B7%BB%E5%8A%A0%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-number">5.5.</span> <span class="toc-text">根据线程池名添加线程池</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%90%8D%E8%8E%B7%E5%8F%96%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-number">5.6.</span> <span class="toc-text">根据线程池名获取线程池</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%85%8D%E7%BD%AE"><span class="toc-number">5.7.</span> <span class="toc-text">创建线程池配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%85%8D%E7%BD%AE"><span class="toc-number">5.8.</span> <span class="toc-text">初始化线程池配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E8%BF%9B%E7%A8%8B%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">5.9.</span> <span class="toc-text">工作进程初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E8%BF%9B%E7%A8%8B%E7%BB%88%E6%AD%A2"><span class="toc-number">5.10.</span> <span class="toc-text">工作进程终止</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/" title="Nginx线程池"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx线程池"/></a><div class="content"><a class="title" href="/2023/06/22/Nginx%E7%BA%BF%E7%A8%8B%E6%B1%A0/" title="Nginx线程池">Nginx线程池</a><time datetime="2023-06-22T12:43:07.000Z" title="Created 2023-06-22 20:43:07">2023-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/19/Nginx%E8%87%AA%E6%97%8B%E9%94%81/" title="Nginx自旋锁"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx自旋锁"/></a><div class="content"><a class="title" href="/2023/06/19/Nginx%E8%87%AA%E6%97%8B%E9%94%81/" title="Nginx自旋锁">Nginx自旋锁</a><time datetime="2023-06-19T13:15:07.000Z" title="Created 2023-06-19 21:15:07">2023-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/17/Nginx%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8/" title="Nginx循环链表"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx循环链表"/></a><div class="content"><a class="title" href="/2023/06/17/Nginx%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8/" title="Nginx循环链表">Nginx循环链表</a><time datetime="2023-06-17T09:26:41.000Z" title="Created 2023-06-17 17:26:41">2023-06-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/16/Nginx%E9%93%BE%E8%A1%A8/" title="Nginx单向链表"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx单向链表"/></a><div class="content"><a class="title" href="/2023/06/16/Nginx%E9%93%BE%E8%A1%A8/" title="Nginx单向链表">Nginx单向链表</a><time datetime="2023-06-16T14:04:01.000Z" title="Created 2023-06-16 22:04:01">2023-06-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/11/Nginx%E7%BC%93%E5%86%B2%E5%8C%BA/" title="Nginx缓冲区"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx缓冲区"/></a><div class="content"><a class="title" href="/2023/06/11/Nginx%E7%BC%93%E5%86%B2%E5%8C%BA/" title="Nginx缓冲区">Nginx缓冲区</a><time datetime="2023-06-11T14:01:20.000Z" title="Created 2023-06-11 22:01:20">2023-06-11</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By NumPy</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
