@@ -1,0 +1,430 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>《C++性能优化指南》读书笔记 | NumPy's Blog</title><meta name="keywords" content="阅读"><meta name="author" content="NumPy,xukeawsl@gmail.com"><meta name="copyright" content="NumPy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《C++性能优化指南》读书笔记">
+<meta property="og:url" content="https://xukeawsl.gitee.io/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="NumPy&#39;s Blog">
+<meta property="og:description" content="读书笔记">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png">
+<meta property="article:published_time" content="2023-12-06T15:12:51.000Z">
+<meta property="article:modified_time" content="2023-12-06T15:13:56.134Z">
+<meta property="article:author" content="NumPy">
+<meta property="article:tag" content="阅读">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png"><link rel="shortcut icon" href="/img/N.png"><link rel="canonical" href="https://xukeawsl.gitee.io/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《C++性能优化指南》读书笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2023-12-06 23:13:56'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">42</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">10</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">10</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">NumPy's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《C++性能优化指南》读书笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2023-12-06T15:12:51.000Z" title="Created 2023-12-06 23:12:51">2023-12-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2023-12-06T15:13:56.134Z" title="Updated 2023-12-06 23:13:56">2023-12-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%98%85%E8%AF%BB/">阅读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">5.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>16min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《C++性能优化指南》读书笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="优化概述"><a href="#优化概述" class="headerlink" title="优化概述"></a>优化概述</h1><ul>
+<li>使用更好的编译器，并打开编译选项</li>
+<li>使用最优算法</li>
+<li>使用更好的库并用好库</li>
+<li>减少内存分配</li>
+<li>减少赋值</li>
+<li>移除计算</li>
+<li>使用最优数据结构</li>
+<li>提高并发</li>
+<li>优化内存管理</li>
+</ul>
+<h1 id="影响优化的计算机行为"><a href="#影响优化的计算机行为" class="headerlink" title="影响优化的计算机行为"></a>影响优化的计算机行为</h1><ul>
+<li>在处理器中，访问内存的性能开销远比其他操作的性能开销大</li>
+<li>非对齐访问所需的时间是所有字节都在同一个字中时的两倍</li>
+<li>访问频繁使用的内存地址的速度比访问非频繁使用的内存地址的速度快</li>
+<li>访问相邻地址的内存的速度比访问互相远隔的地址的内存快</li>
+<li>由于高速缓存的存在，一个函数运行于整个程序的上下文中的执行速度可能比运行于测试套件中时更慢</li>
+<li>访问线程间共享的数据比访问非共享的数据要慢很多</li>
+<li>计算比做决定快</li>
+<li>每个程序都会与其他程序竞争计算机资源</li>
+<li>如果一个程序必须在启动时执行或是在负载高峰期时执行，那么在测量性能时必须加载负载</li>
+<li>每一次赋值、函数参数的初始化和函数返回值都会调用一次构造函数，这个函数可能隐藏了大量的未知代码</li>
+<li>有些语句隐藏了大量的计算。从语句的外表上看不出语句的性能开销会有多大</li>
+<li>当并发线程共享数据时，同步代码降低了并发量</li>
+</ul>
+<h1 id="测量性能"><a href="#测量性能" class="headerlink" title="测量性能"></a>测量性能</h1><ul>
+<li>必须测量性能</li>
+<li>做出可测试的预测并记录预测</li>
+<li>记录代码修改</li>
+<li>如果每次都记录了实验内容，那么就可以快速地重复实验</li>
+<li>一个程序会花费 90% 的运行时间去执行 10% 的代码</li>
+<li>只有正确且精确的测量才是准确的测量</li>
+<li>分辨率不是准确性</li>
+<li>只进行有明显效果的性能改善，开发人员就无需担忧方法论的问题</li>
+<li>计算一条 C++ 语句对内存的读写次数，可以估算出一条 C++ 语句的性能开销</li>
+</ul>
+<h1 id="优化字符串的使用：案例研究"><a href="#优化字符串的使用：案例研究" class="headerlink" title="优化字符串的使用：案例研究"></a>优化字符串的使用：案例研究</h1><p>针对 <code>std::string</code> 可以进行如下方面的优化：</p>
+<ul>
+<li>在字符串尾部添加字符时，可以使用复合赋值操作避免临时字符串（ s = s + c 替换为 s += c 或 s.push_back(c)）</li>
+<li>如果字符串最大大小可以预估，则可以通过预留存储空间减少内存的重新分配（使用 s.reserve(n) 预留 n 个字符的空间，在尾部添加字符串时可以使用 s.append(ss) 来利用预留存储空间）</li>
+<li>作为参数传递时，可以通过引用传递，消除对参数字符串的复制</li>
+<li>消除对返回字符串的复制（现在 C++ 有 RVO 返回值优化和 SSO 短字符串优化）</li>
+<li>在适当的条件下，使用 C 风格的字符数组替换 C++ 的 <code>std::string</code> 后可以极大程度地改善程序的性能</li>
+<li>在应用层面，可以使用更好的算法、编译器或字符串库来提高性能<ul>
+<li><a target="_blank" rel="noopener" href="https://www.boost.org/doc/libs/?view=category_String">Boost Library Documentation - String and text processing</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.partow.net/programming/strtk/index.html">.:: C++ String Toolkit Library (StrTk) - By Arash Partow ::.</a></li>
+</ul>
+</li>
+<li>使用 <code>std::string_view</code> 可以有效避免字符串拷贝，在只需要读取字符串的场景性能极好</li>
+<li>使用一些实现特殊的字符串来提升性能<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/facebook/folly/blob/main/folly/docs/FBString.md">folly/folly/docs/FBString.md at main · facebook/folly</a></li>
+<li><a target="_blank" rel="noopener" href="http://johnpanzer.com/tsc_cuj/ToolboxOfStrings.html">A Toolbox of Strings</a></li>
+<li><a target="_blank" rel="noopener" href="https://bstring.sourceforge.net/">The Better String Library</a></li>
+</ul>
+</li>
+<li>使用更好的内存分配器而不是标准库的默认内存分配器（成本比较高，且需要在项目之初就计划好）</li>
+</ul>
+<p><strong>小结：</strong></p>
+<ul>
+<li>由于字符串是动态分配内存的，因此它们的性能开销非常大。它们在表达式中的行为与值类似，它们的实现方式中需要大量的复制</li>
+<li>将字符串作为对象而非值可以降低内存分配和复制的频率</li>
+<li>为字符串预留内存空间可以减少内存分配的开销</li>
+<li>将指向字符串的常量引用传递给函数与传递值的结果几乎一样，但是更加高效</li>
+<li>将函数的结果通过输出参数作为引用返回给调用方会复用实参的存储空间，这可能比分配新的存储空间更高效</li>
+<li>即使只是有时候会减少内存分配的开销，仍然是一种优化</li>
+<li>有时候，换一种不同的算法会更容易优化或是本身就更高效</li>
+<li>标准库中的类是为通用用途而实现的，它们很简单。它们并不需要特别高效，也没有为某些特殊用途而进行优化</li>
+</ul>
+<h1 id="优化算法"><a href="#优化算法" class="headerlink" title="优化算法"></a>优化算法</h1><h2 id="合理选择算法"><a href="#合理选择算法" class="headerlink" title="合理选择算法"></a>合理选择算法</h2><p>根据实际场景选用合适的算法来处理，注意分析时间复杂度和空间复杂度</p>
+<h2 id="优化模式"><a href="#优化模式" class="headerlink" title="优化模式"></a>优化模式</h2><ul>
+<li><strong>预计算：</strong>可以在程序早期，例如设计时、编译时或是链接时，通过在热点代码前执行计算来将计算从热点部分中移除（例如 C++ 中提供的 constexpr 关键字来进行编译期计算工作）</li>
+<li><strong>延迟计算：</strong>通过在真正需要执行计算时才执行计算，可以将计算从某些代码路径上移除（例如经典的写时拷贝，指当一个对象被复制时，并不复制它的动态成员变量，而是让两个实例共享动态变量。只在其中某个实例要修改该变量时，才会真正进行复制）</li>
+<li><strong>批量处理：</strong>每次对多个元素一起进行计算，而不是只对一个元素进行计算（例如日志缓存输出、多线程任务队列）</li>
+<li><strong>缓存：</strong>通过保存和复用昂贵计算的结果来减少计算量，而不是重复进行计算（例如线程池缓存了开销很大的线程，降低了动态创建删除线程的性能损耗）</li>
+<li><strong>特化：</strong>通过移除未使用的共性来减少计算量（例如，<code>std::string</code> 可以动态地改变长度，但是如果只需要比较固定的字符串，那么使用 C 风格的数组会更加高效）</li>
+<li><strong>提高处理量：</strong>通过一次处理一大组数据来减少循环处理的开销（例如，内存池向操作系统一次性申请大块内存来减少多次进行少量内存分配带来的开销）</li>
+<li><strong>提示：</strong>通过在代码中加入可能会改善性能的提升来减少计算量（例如，<code>std::map</code> 提供了重载的 <code>insert()</code> 成员函数，可以在特定位置插入，以得到更快的速度）</li>
+<li><strong>优化期待路径：</strong>以期待频率从高到低的顺序对输入数据或是运行时发生的事件进行测试（例如，在 <code>if (xx) &#123;&#125; else if (xx) &#123;&#125;</code> 语句中，将可能判断成功的条件放在前面判断，这样可以一定程度上减少无用的判断）</li>
+<li><strong>散列法：</strong>计算可变长字符串等大型数据结构的压缩数值映射（散列值）。在进行比较时，用散列值代替数据结构可以提高性能（通过比较两个输入数据的散列值，可以高效地判断它们是否相等。如果散列值不同，那么它们一定不相等。如果散列值相等，那么输入数据可能相等。散列法可与双重检查一起使用，以优化条件判断处理的性能）</li>
+<li><strong>双重检查：</strong>通过先进行一项开销不大的检查，然后只在必要时才进行另外一项开销昂贵的检查来减少计算量（例如，比较字符串相等时可以先比较两者的长度，如果长度不同，则不需要进行昂贵的逐字符比较操作）</li>
+</ul>
+<h1 id="优化动态分配内存的变量"><a href="#优化动态分配内存的变量" class="headerlink" title="优化动态分配内存的变量"></a>优化动态分配内存的变量</h1><h2 id="变量的存储期"><a href="#变量的存储期" class="headerlink" title="变量的存储期"></a>变量的存储期</h2><ul>
+<li><strong>静态存储期：</strong>静态变量的内存空间在程序的整个生命周期内都会被一直保留。所有的全局静态变量都会在程序执行进入 main() 前被构建，在退出 main() 之后被销毁。在函数内声明的静态变量则会在“程序执行第一次进入函数前”被构建，这表示它可能会和全局静态变量同时被构建，也可能知道第一次调用该函数时才会被构建。为静态变量创建存储空间是没有运行时开销的。因此，静态变量适用于那些在整个程序的生命周期内都会被使用的数据。</li>
+<li><strong>线程局部存储期：</strong>线程局部变量在进入线程时被构建，在退出线程时被析构。它们的生命周期与线程的生命周期一样。每个线程都包含一份这类变量的独立的副本。</li>
+<li><strong>自动存储期：</strong>具有自动存储期的变量被分配在编译器在函数调用栈上预留的内存空间中。当递归不收敛或是发生深度函数嵌套调用导致自动变量占用的存储空间大小超出调用栈最大值时，会发生栈溢出。</li>
+<li><strong>动态存储期：</strong>具有动态存储期的变量被保存在程序请求的内存中。与自动变量类似，但与静态变量不同的是，动态变量的地址是在运行时确定的。不同于静态变量、线程局部变量和自动变量的是，数组的声明语法被扩展了，这样可以在运行时通过一个（非常量）表达式来指定动态数组的最高维度。</li>
+</ul>
+<h2 id="变量的所有权"><a href="#变量的所有权" class="headerlink" title="变量的所有权"></a>变量的所有权</h2><ul>
+<li>全局所有权</li>
+<li>词法作用域所有权</li>
+<li>成员所有权</li>
+<li>动态变量所有权</li>
+</ul>
+<h2 id="值对象与实体对象"><a href="#值对象与实体对象" class="headerlink" title="值对象与实体对象"></a>值对象与实体对象</h2><ul>
+<li>实体是独一无二的</li>
+<li>实体是可变的</li>
+<li>实体是不可复制的</li>
+<li>实体是不可比较的</li>
+<li>值是可互换和可比较的</li>
+<li>值是不可变的</li>
+<li>值是可以复制的</li>
+</ul>
+<h2 id="减少动态变量的使用"><a href="#减少动态变量的使用" class="headerlink" title="减少动态变量的使用"></a>减少动态变量的使用</h2><ol>
+<li>静态地创建类实例</li>
+<li>使用静态数据结构<ol>
+<li>用 <code>std::array</code> 替代 <code>std::vector</code></li>
+<li>在栈上创建大块缓冲区</li>
+<li>静态地创建链式数据结构</li>
+<li>在数组中创建二叉树</li>
+<li>用环形缓冲区替换双端队列</li>
+</ol>
+</li>
+<li>使用 <code>std::make_shared</code> 替换 <code>new</code> 表达式</li>
+<li>不要无谓地共享所有权</li>
+<li>使用 “主指针” 拥有动态变量</li>
+</ol>
+<h2 id="减少动态变量的重新分配"><a href="#减少动态变量的重新分配" class="headerlink" title="减少动态变量的重新分配"></a>减少动态变量的重新分配</h2><ol>
+<li>预分配动态变量以防止重新分配</li>
+<li>在循环外创建动态变量</li>
+<li>移除无谓的复制<ol>
+<li>在类定义中禁止不希望发生的复制</li>
+<li>移除函数调用上的复制</li>
+<li>移除函数返回上的复制（只用在某些特殊的情况下编译期才能够进行 RVO。函数必须返回一个局部对象。编译器必须能够确定在所有的控制路径上返回的都是相同的对象。返回对象的类型必须与所声明的函数返回值的类型相同）</li>
+<li>免复制库</li>
+<li>实现写时复制惯用法</li>
+<li>切割（slice）数据结构（例如使用 <code>std::string_view</code>)</li>
+</ol>
+</li>
+</ol>
+<h2 id="实现移动语义"><a href="#实现移动语义" class="headerlink" title="实现移动语义"></a>实现移动语义</h2><ol>
+<li>更新代码以使用移动语义</li>
+<li>移动语义的微妙之处<ol>
+<li>移动实例至 <code>std::vector</code> ，对象需要实现移动操作并声明为 <code>noexcept</code></li>
+<li>右值引用参数是左值</li>
+<li>不要返回右值引用，会妨碍返回值优化（RVO）</li>
+</ol>
+</li>
+</ol>
+<h2 id="扁平数据结构"><a href="#扁平数据结构" class="headerlink" title="扁平数据结构"></a>扁平数据结构</h2><ul>
+<li>相比于通过指针链接在一起的数据结构，创建扁平数据结构实例时调用内存管理器的开销更小。有些数据结构会创建许多动态变量，而其他数据结构则比较少。</li>
+<li><code>std::array</code> 和 <code>std::vector</code> 等扁平数据结构所需的内存比 <code>list</code>、<code>map</code>、<code>unordered_map</code> 等基于节点的数据结构少，因为在基于节点的数据结构中存在着链接指针的开销。即使所消耗的总字节数没有问题，紧凑的数据结构仍有助于改善缓存局部性。扁平数据结构在局部缓存性上的优势使得它们更加高效。</li>
+<li>以前常常需要用到的技巧，诸如用智能指针组成 <code>vector</code> 或 <code>map</code> 来存储不可复制的对象，在 C++11 中的移动语义出现后已经不再需要了。移动语义移除了在分配智能指针和它所指向的对象的存储空间时产生的显著的运行时开销。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>在 C++ 程序中，乱用动态内存分配的变量是最大的“性能杀手”。当发生性能问题时， <code>new</code> 不再是你的朋友。</li>
+<li>只要知道了如何减少对内存管理器的调用，开发人员就能够成为一个高效的性能优化专家。</li>
+<li>通过调用 <code>::operator new()</code> 运算符和 <code>::operator delete()</code> 运算符，可以整体地改变程序分配内存的方式。</li>
+<li>通过替换 <code>malloc()</code> 和 <code>free()</code> 可以整体地改变程序管理内存的方式。</li>
+<li>智能指针实现了动态变量所有权的自动化。</li>
+<li>共享了所有权的动态变量更加昂贵。</li>
+<li>静态地创建类实例。</li>
+<li>静态地创建类成员并且在有必要时采用两段初始化。</li>
+<li>让主指针来拥有动态变量，使用无主指针替代共享所有权。</li>
+<li>编写通过输出参数返回值的免复制函数。</li>
+<li>实现移动语义。</li>
+<li>扁平数据结构更好。</li>
+</ul>
+<h1 id="优化热点语句"><a href="#优化热点语句" class="headerlink" title="优化热点语句"></a>优化热点语句</h1><ul>
+<li>除非有一些因素放大了语句的性能开销，否则不值得进行语句级别的性能优化，因为所能带来的性能提升不大。</li>
+<li>循环中的语句的性能开销被放大的倍数是循环的次数。</li>
+<li>函数中的语句的性能开销被放大的倍数是其在函数中被调用的次数。</li>
+<li>被频繁地调用的编程编程惯用法的性能开销被放大的倍数是其被调用的次数。</li>
+<li>有些 C++ 语句（赋值、初始化、函数参数计算）中包含了隐含的函数调用。</li>
+<li>调用操作系统的函数的开销是昂贵的。</li>
+<li>一种有效的移除函数调用开销的方法是内联函数。</li>
+<li>现在几乎不再需要 PIMPL 编程惯用法了。如今程序的编译时间只有发明 PIMPL 的那个年代的 1% 左右。</li>
+<li>double 计算可能会比 float 计算更快。</li>
+</ul>
+<h1 id="使用更好的库"><a href="#使用更好的库" class="headerlink" title="使用更好的库"></a>使用更好的库</h1><ul>
+<li>C++ 标准库之所以提供这些函数和类，是因为要么无法以其他方式提供这些函数和类，要么这些函数和类会被广泛地用于多种操作系统上。</li>
+<li>在标准库实现中也存在 bug 。</li>
+<li>没有一种“完全符合标准的实现”。</li>
+<li>标准库不如最好的原生函数高效。</li>
+<li>当要升级库时，尽量只进行最小的改动。</li>
+<li>接口的稳定性是可交付的库的核心。</li>
+<li>在对库进行性能优化时，测试用例非常关键。</li>
+<li>设计库与设计其他 C++ 代码是一样的，只是风险更高。</li>
+<li>多数抽象都不需要超过三层类继承层次。</li>
+<li>多数抽象的实现都不需要超过三层嵌套函数调用。</li>
+</ul>
+<h1 id="优化查找和排序"><a href="#优化查找和排序" class="headerlink" title="优化查找和排序"></a>优化查找和排序</h1><ul>
+<li>C++ 的混合特性为我们提供了多种实现方式，一方面我们可以实现性能管理的全自动化，另一方面也可以对性能逐渐地进行精准控制。正是这些选择方式使得我们可以优化 C++ 程序以满足性能需求。</li>
+<li>在大多数活动中都会有足够多的组件值得优化，而试图在脑海中记住它们是不可靠的。好记性不如烂笔头，将它们记录在纸上更好。</li>
+<li>在一项查找一个有 26 个键的表的性能测试中，以字符串为键的 <code>std::unordered_map</code> 只比以字符串为键的 <code>std::map</code> 快了 52%。大家都在炒作 <code>std::unordered_map</code> 在散列性能上战胜了 <code>std::map</code>，但实际的测试结果却令人吃惊。</li>
+<li>斯特潘诺夫的抽象惩罚是使用 C++ 标准库算法这样的能够提高生产力的工具的代价。</li>
+</ul>
+<h1 id="优化数据结构"><a href="#优化数据结构" class="headerlink" title="优化数据结构"></a>优化数据结构</h1><ul>
+<li>序列容器 <code>std::string</code> 、<code>std::vector</code> 、<code>std::deque</code> 、<code>std::list</code> 和 <code>std::forward_list</code> 中元素的顺序与他们被插入的顺序相同。其中  <code>std::string</code> 、<code>std::vector</code> 、<code>std::deque</code> 能够通过下标访问，但 <code>std::deque</code> 由于使用数组的数组来实现，因此索引操作的常数比较大。</li>
+<li>所有的关联容器都会按照元素的某种属性上的顺序关系，而不是按照插入的顺序来保存元素。一共有死种有序关联容器 <code>std::map</code> 、<code>std::multimap</code> 、<code>std::set</code> 、<code>std::multiset</code> 。有序关联容器的实现是平衡二叉树。还有四种无序关联容器 <code>std::unordered_map</code> 、<code>std::unordered_multimap</code> 、<code>std::unordered_set</code> 和 <code>std::unordered_multiset</code> 。无序关联容器的实现方式是散列表。</li>
+<li>各容器类的大 O 标记性能并不能反映真实情况。有些容器比其他容器快许多倍。</li>
+<li>在进行插入、删除、遍历和排序操作时 <code>std::vector</code> 都是最快的容器。</li>
+<li>使用 <code>std::lower_bound</code> 查找有序 <code>std::vector</code> 的速度可以与查找 <code>std::map</code> 的速度相匹敌。</li>
+<li><code>std::deque</code> 只比 <code>std::list</code> 稍快一点。</li>
+<li><code>std::forward_list</code> 并不比 <code>std::list</code> 更快。</li>
+<li>散列表 <code>std::unordered_map</code> 比 <code>std::map</code> 更快，但是相比所受到的开发人员的器重程度，它并没有比 <code>std::map</code> 快上一个数量级。</li>
+</ul>
+<h1 id="优化-I-O"><a href="#优化-I-O" class="headerlink" title="优化 I/O"></a>优化 I/O</h1><ul>
+<li>增大 rdbuf 的大小可以让读取文件的性能提高几个百分点。</li>
+<li>最快的读取文件的方法是预先为字符串分配与文件大小相同的缓冲区，然后调用 <code>std::streambuf::sgetn()</code> 函数填充字符串缓冲区。</li>
+<li> <code>std::endl</code> 会刷新输出。如果你并不打算在控制台上输出，那么它的开销是昂贵的。</li>
+<li> <code>std::cout</code> 是与 <code>std::cin</code> 和 <code>stdout</code> 捆绑在一起的。打破这种连接能够改善性能。调用静态成员函数 <code>std::ios_base::sync_with_stdio(false)</code> 可以打破这种连接，改善性能，但代价是如果程序同时使用了 C 和 C++ I/O 函数，那么交叉行为将变得不可预测。</li>
+</ul>
+<h1 id="优化并发"><a href="#优化并发" class="headerlink" title="优化并发"></a>优化并发</h1><ul>
+<li><p>用 <code>std::async</code> 替代 <code>std::thread</code> 。从 C++ 标准来看，<code>std::async()</code> 可能是使用线程池的方式实现的。</p>
+</li>
+<li><p>创建与核心数量一样多的可执行线程。C++ 提供了一个 <code>std::thread::hardware_concurrency()</code> 函数，它可以返回可用核心的数量。</p>
+</li>
+<li><p>实现任务队列和线程池。</p>
+</li>
+<li><p>在单独的线程中执行 I/O。</p>
+</li>
+<li><p>编写没有同步的程序。同步和互斥会降低多线程程序的速度。拜托同步可以提升程序性能。编写没有显式同步的程序，有三个简单方式和一个困难方式：面向事件编程、协程、消息传递、无锁编程。</p>
+</li>
+<li><p>移除启动和停止代码。 具有静态存储期的类类型，其初始化过程在单独线程中连续地调用各个变量的构造函数。</p>
+</li>
+<li><p>让同步更加高效</p>
+<ul>
+<li>减小临界区的范围。</li>
+<li>限制并发线程的数量。</li>
+<li>避免惊群。</li>
+<li>避免锁护送。</li>
+<li>减少竞争：复制资源、分割资源、细粒度锁、无锁数据结构、资源的调度。</li>
+</ul>
+</li>
+<li><p>不要在单核系统上繁忙等待。</p>
+</li>
+<li><p>不要永远等待。</p>
+</li>
+<li><p>自己设计互斥锁可能会低效。</p>
+</li>
+<li><p>限制生产者输出队列的长度。队列的长度只需能够应对消费者性能的变化就可以了。</p>
+</li>
+<li><p>使用并发库</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.boost.org/doc/libs/1_83_0/doc/html/thread.html">Boost.Thread</a> 和 <a target="_blank" rel="noopener" href="https://www.boost.org/doc/libs/1_83_0/libs/coroutine2/doc/html/index.html">Boost.Coroutine2</a></li>
+<li>POSIX 线程</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/oneapi-src/oneTBB">线程构建模块</a></li>
+<li><a target="_blank" rel="noopener" href="https://zeromq.org/">ZeroMQ</a></li>
+<li><a target="_blank" rel="noopener" href="https://hpc-tutorials.llnl.gov/mpi/">消息传递接口</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.openmp.org/">OpenMP</a></li>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/cpp/parallel/amp/cpp-amp-cpp-accelerated-massive-parallelism?view=msvc-170&redirectedfrom=MSDN">C++ AMP</a><h1 id="优化内存管理"><a href="#优化内存管理" class="headerlink" title="优化内存管理"></a>优化内存管理</h1></li>
+</ul>
+</li>
+<li><p>相比于内存管理器，在其他地方看看有没有可能带来更好性能改善效果的优化机会。</p>
+</li>
+<li><p>对几个大型开源程序的研究表明，替换默认内存管理器对程序整体运行速度的性能提升最多只有 30%。</p>
+</li>
+<li><p>为申请相同大小内存块的请求分配内存的内存管理器是很容易编写的，它的运行效率也很高。</p>
+</li>
+<li><p>同一个类实例的分配内存的请求锁申请的内存的大小是一样的。</p>
+</li>
+<li><p>可以在类级别重写 new() 运算符。</p>
+</li>
+<li><p>标准库容器 <code>std::list</code> 、<code>std::map</code> 、<code>std::multimap</code> 、<code>std::set</code> 和 <code>std::multiset</code> 都从许多同等的节点中创建数据结构。</p>
+</li>
+<li><p>标准库容器接收一个 Allocator 作为参数，与类专用 new() 运算符一样，它也允许自定义内存管理。</p>
+</li>
+<li><p>编写一个自定义内存管理器或分配器可以提高程序性能，但相比于移除对内存管理器的调用等其他优化方法，它的效果没有那么明显。</p>
+</li>
+<li><p>对于老式的操作系统和嵌入式开发，下面是一些通常都被认为是 <code>malloc()</code> 的高性能替代品的方法</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/emeryberger/Hoard">Hoard</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/cd/E36784_01/html/E36874/mtmalloc-3malloc.html">mtmalloc</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/emeryberger/Malloc-Implementations/tree/master/allocators/ptmalloc/ptmalloc3">ptmalloc</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/google/tcmalloc">tcmalloc</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.boost.org/doc/libs/1_83_0/libs/pool/doc/html/index.html">Boost.Pool</a></li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:xukeawsl@gmail.com">NumPy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://xukeawsl.gitee.io/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">https://xukeawsl.gitee.io/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%98%85%E8%AF%BB/">阅读</a></div><div class="post_share"><div class="social-share" data-image="https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/10/22/Nginx%E4%BA%92%E6%96%A5%E9%94%81/"><img class="next-cover" src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Nginx互斥锁</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2023/08/20/%E3%80%8A%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" title="《程序员的自我修养》读书笔记"><img class="cover" src="https://s2.loli.net/2023/08/20/zLJ73C8ITqD4eUk.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-20</div><div class="title">《程序员的自我修养》读书笔记</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/11/23/kxpMnNjGaOhZews.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">NumPy</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">42</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">10</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">10</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xukeawsl/"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xukeawsl" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xukeawsl@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">优化概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BD%B1%E5%93%8D%E4%BC%98%E5%8C%96%E7%9A%84%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A1%8C%E4%B8%BA"><span class="toc-number">2.</span> <span class="toc-text">影响优化的计算机行为</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%8B%E9%87%8F%E6%80%A7%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">测量性能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E4%BD%BF%E7%94%A8%EF%BC%9A%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6"><span class="toc-number">4.</span> <span class="toc-text">优化字符串的使用：案例研究</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">优化算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E7%90%86%E9%80%89%E6%8B%A9%E7%AE%97%E6%B3%95"><span class="toc-number">5.1.</span> <span class="toc-text">合理选择算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.2.</span> <span class="toc-text">优化模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E5%86%85%E5%AD%98%E7%9A%84%E5%8F%98%E9%87%8F"><span class="toc-number">6.</span> <span class="toc-text">优化动态分配内存的变量</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E5%AD%98%E5%82%A8%E6%9C%9F"><span class="toc-number">6.1.</span> <span class="toc-text">变量的存储期</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E6%89%80%E6%9C%89%E6%9D%83"><span class="toc-number">6.2.</span> <span class="toc-text">变量的所有权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%B8%8E%E5%AE%9E%E4%BD%93%E5%AF%B9%E8%B1%A1"><span class="toc-number">6.3.</span> <span class="toc-text">值对象与实体对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%8F%E5%B0%91%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">6.4.</span> <span class="toc-text">减少动态变量的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%8F%E5%B0%91%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F%E7%9A%84%E9%87%8D%E6%96%B0%E5%88%86%E9%85%8D"><span class="toc-number">6.5.</span> <span class="toc-text">减少动态变量的重新分配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89"><span class="toc-number">6.6.</span> <span class="toc-text">实现移动语义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%81%E5%B9%B3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">6.7.</span> <span class="toc-text">扁平数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">6.8.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%83%AD%E7%82%B9%E8%AF%AD%E5%8F%A5"><span class="toc-number">7.</span> <span class="toc-text">优化热点语句</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%BA%93"><span class="toc-number">8.</span> <span class="toc-text">使用更好的库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%9F%A5%E6%89%BE%E5%92%8C%E6%8E%92%E5%BA%8F"><span class="toc-number">9.</span> <span class="toc-text">优化查找和排序</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">10.</span> <span class="toc-text">优化数据结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96-I-O"><span class="toc-number">11.</span> <span class="toc-text">优化 I&#x2F;O</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%B9%B6%E5%8F%91"><span class="toc-number">12.</span> <span class="toc-text">优化并发</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">13.</span> <span class="toc-text">优化内存管理</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" title="《C++性能优化指南》读书笔记"><img src="https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《C++性能优化指南》读书笔记"/></a><div class="content"><a class="title" href="/2023/12/06/%E3%80%8AC++%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E5%8D%97%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" title="《C++性能优化指南》读书笔记">《C++性能优化指南》读书笔记</a><time datetime="2023-12-06T15:12:51.000Z" title="Created 2023-12-06 23:12:51">2023-12-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/10/22/Nginx%E4%BA%92%E6%96%A5%E9%94%81/" title="Nginx互斥锁"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx互斥锁"/></a><div class="content"><a class="title" href="/2023/10/22/Nginx%E4%BA%92%E6%96%A5%E9%94%81/" title="Nginx互斥锁">Nginx互斥锁</a><time datetime="2023-10-22T12:27:55.000Z" title="Created 2023-10-22 20:27:55">2023-10-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/10/22/Nginx%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C/" title="Nginx原子操作"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx原子操作"/></a><div class="content"><a class="title" href="/2023/10/22/Nginx%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C/" title="Nginx原子操作">Nginx原子操作</a><time datetime="2023-10-22T06:08:13.000Z" title="Created 2023-10-22 14:08:13">2023-10-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/10/22/Nginx%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98/" title="Nginx共享内存"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx共享内存"/></a><div class="content"><a class="title" href="/2023/10/22/Nginx%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98/" title="Nginx共享内存">Nginx共享内存</a><time datetime="2023-10-22T06:08:04.000Z" title="Created 2023-10-22 14:08:04">2023-10-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/10/15/Nginx%E5%86%85%E9%83%A8%E5%8F%98%E9%87%8F/" title="Nginx内部变量"><img src="https://s2.loli.net/2023/06/04/xNRnJCVFOkhDfM6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx内部变量"/></a><div class="content"><a class="title" href="/2023/10/15/Nginx%E5%86%85%E9%83%A8%E5%8F%98%E9%87%8F/" title="Nginx内部变量">Nginx内部变量</a><time datetime="2023-10-15T09:39:02.000Z" title="Created 2023-10-15 17:39:02">2023-10-15</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/12/06/RNqZOcz4bWp6AVx.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By NumPy</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
